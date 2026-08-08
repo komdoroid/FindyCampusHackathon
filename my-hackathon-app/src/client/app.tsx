@@ -25,18 +25,21 @@ function App() {
   const [showPostFlow, setShowPostFlow] = useState(shouldShowPostFlow)
   const [postVersion, setPostVersion] = useState(0)
 
-  if (view === 'mypage') {
-    return <MyPage userId={userId} onBack={() => setView('map')} />
-  }
-
   return (
     <>
-      <MapView
-        userId={userId}
-        refreshKey={postVersion}
-        onPostAgain={() => setShowPostFlow(true)}
-        onOpenMyPage={() => setView('mypage')}
-      />
+      {/* マイページ表示中もMapViewをアンマウントしない。地図に戻るたびにLeafletの再初期化と
+          summary/posts/insightの再フェッチが走り、反映が遅く見える・シームレスでなくなるのを防ぐ */}
+      <div className={view === 'map' ? undefined : 'view-hidden'}>
+        <MapView
+          userId={userId}
+          refreshKey={postVersion}
+          active={view === 'map'}
+          onPostAgain={() => setShowPostFlow(true)}
+          onOpenMyPage={() => setView('mypage')}
+        />
+      </div>
+
+      {view === 'mypage' && <MyPage userId={userId} onBack={() => setView('map')} />}
 
       {showPostFlow && (
         <Modal size="compact" onClose={() => setShowPostFlow(false)}>

@@ -238,6 +238,10 @@ html, #root {
   height: 100%;
 }
 
+.view-hidden {
+  display: none;
+}
+
 .map-view {
   display: flex;
   flex-direction: column;

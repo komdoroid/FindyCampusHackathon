@@ -85,6 +85,10 @@ function pseudoRandom(seed: number): number {
 
 const wardBoundsCache = new Map<string, ReturnType<typeof polygonBounds>>()
 const wardCentroidCache = new Map<string, [number, number]>()
+// jitterPositionInWardは(wardId, id)だけで決まる純粋関数なので、投稿idごとに結果をキャッシュする。
+// キャッシュがないと、ズーム/パンのたびに毎回全投稿分の棄却サンプリング(点-in-多角形判定を最大20回)を
+// やり直すことになり、表示件数が増えるほどズーム操作のたびに重くなっていた
+const postPositionCache = new Map<number, [number, number]>()
 
 // 区の天気バッジを置く位置(ポリゴン頂点の重心)。区ごとに固定なのでキャッシュする
 function wardCentroid(wardId: string): [number, number] {
@@ -109,6 +113,9 @@ function wardCentroid(wardId: string): [number, number] {
 
 // 区の実際のポリゴン内に収まる位置を疑似乱数で決める(棄却サンプリング)
 function jitterPositionInWard(wardId: string, id: number): [number, number] {
+  const cached = postPositionCache.get(id)
+  if (cached) return cached
+
   const polygon = WARD_POLYGONS[wardId]
   const fallback = WARD_MAP[wardId]
   if (!polygon) return [fallback.lat, fallback.lng]
@@ -119,14 +126,17 @@ function jitterPositionInWard(wardId: string, id: number): [number, number] {
     wardBoundsCache.set(wardId, bounds)
   }
 
+  let result: [number, number] = [fallback.lat, fallback.lng]
   for (let attempt = 0; attempt < 20; attempt++) {
     const lat = bounds.minLat + pseudoRandom(id * 3 + attempt * 97 + 1) * (bounds.maxLat - bounds.minLat)
     const lng = bounds.minLng + pseudoRandom(id * 5 + attempt * 97 + 2) * (bounds.maxLng - bounds.minLng)
     if (isPointInPolygon(lat, lng, polygon)) {
-      return [lat, lng]
+      result = [lat, lng]
+      break
     }
   }
-  return [fallback.lat, fallback.lng]
+  postPositionCache.set(id, result)
+  return result
 }
 
 function escapeHtml(s: string): string {
@@ -136,11 +146,13 @@ function escapeHtml(s: string): string {
 export function MapView({
   userId,
   refreshKey,
+  active,
   onPostAgain,
   onOpenMyPage,
 }: {
   userId: string
   refreshKey: number
+  active: boolean
   onPostAgain: () => void
   onOpenMyPage: () => void
 }) {
@@ -267,20 +279,45 @@ export function MapView({
 
     // pin階層(拡大時)の時だけピンをDOMに追加する。ズームアウト中は空にして負荷を抑える。
     // 投稿数が多いと全件分のDOM(コメント付きは常時吹き出し表示まで)を作ることになり重くなるため、
-    // 今見えている範囲(+少し余裕)に入っているものだけを描画する
+    // 今見えている範囲(+少し余裕)に入っているものだけを描画する。
+    // permanent tooltip付きのマーカーは生成・配置コストが高いため、パン/ズームのたびに
+    // 全消去して作り直すのではなく、表示範囲に出入りした差分だけをDOMに反映する
+    const markersById = new Map<number, L.Marker>()
+
     function renderPins() {
       const layerGroup = pinLayerRef.current
       if (!layerGroup) return
-      layerGroup.clearLayers()
-      if (zoomTierRef.current !== 'pin') return
+
+      if (zoomTierRef.current !== 'pin') {
+        if (markersById.size > 0) {
+          layerGroup.clearLayers()
+          markersById.clear()
+        }
+        return
+      }
 
       const visibleBounds = map.getBounds().pad(0.2)
+      const desired = new Map<number, { post: Post; lat: number; lng: number }>()
 
       for (const post of postsRef.current) {
         const ward = WARD_MAP[post.ward]
         if (!ward) continue
         const [lat, lng] = jitterPositionInWard(post.ward, post.id)
         if (!visibleBounds.contains([lat, lng])) continue
+        desired.set(post.id, { post, lat, lng })
+      }
+
+      // 表示範囲外に出た/データから消えたピンだけを取り除く
+      for (const [id, marker] of markersById) {
+        if (!desired.has(id)) {
+          layerGroup.removeLayer(marker)
+          markersById.delete(id)
+        }
+      }
+
+      // 新しく表示範囲に入ったピンだけを追加する(既存のピンのDOMには触れない)
+      for (const [id, { post, lat, lng }] of desired) {
+        if (markersById.has(id)) continue
         const mine = post.userId !== null && post.userId === userId
         const marker = L.marker([lat, lng], {
           pane: 'pinPane',
@@ -306,9 +343,21 @@ export function MapView({
           })
         }
         layerGroup.addLayer(marker)
+        markersById.set(id, marker)
       }
     }
-    renderPinsRef.current = renderPins
+    // 1回のズーム操作でzoomendとmoveendが両方発火し、renderPinsが同じ内容で2回走ってしまうことがあるため、
+    // 同一フレーム内の呼び出しを1回にまとめる
+    let renderPinsScheduled = false
+    function scheduleRenderPins() {
+      if (renderPinsScheduled) return
+      renderPinsScheduled = true
+      requestAnimationFrame(() => {
+        renderPinsScheduled = false
+        renderPins()
+      })
+    }
+    renderPinsRef.current = scheduleRenderPins
 
     function currentTier(zoom: number): 'far' | 'pin' {
       return zoom >= PIN_ZOOM_THRESHOLD ? 'pin' : 'far'
@@ -323,11 +372,11 @@ export function MapView({
       el.classList.toggle('pins-visible', tier === 'pin')
       // 個別ピンが見える段階では雲(ブロブ)を消す。遠景の一覧性のためだけの表現なので
       blobPane.style.opacity = tier === 'far' ? '0.75' : '0'
-      if (tierChanged) renderPins()
+      if (tierChanged) scheduleRenderPins()
     }
     // ピン表示中にパンした時も、表示範囲が変わるので描画し直す
     function handleMoveEnd() {
-      if (zoomTierRef.current === 'pin') renderPins()
+      if (zoomTierRef.current === 'pin') scheduleRenderPins()
     }
     updateZoomTier()
     map.on('zoomend', updateZoomTier)
@@ -341,6 +390,16 @@ export function MapView({
       mapRef.current = null
     }
   }, [])
+
+  // マイページ表示中はMapViewをdisplay:noneで隠しているだけ(アンマウントしない)。
+  // 非表示の間にLeafletのサイズキャッシュが古いまま残るため、再表示時に計算し直す
+  useEffect(() => {
+    if (!active || !mapRef.current) return
+    const map = mapRef.current
+    requestAnimationFrame(() => {
+      map.invalidateSize()
+    })
+  }, [active])
 
   // 現在地の区を判定して左上に表示する(位置情報が使えない/拒否時は何も表示しない)
   useEffect(() => {
