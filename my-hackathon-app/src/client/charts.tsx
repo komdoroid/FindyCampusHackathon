@@ -1,4 +1,5 @@
 import { SCORE_COLOR, SCORE_EMOJI } from '../shared/wards'
+import { MoodFace, type MoodLevel } from './MoodFace'
 
 // --- 円グラフ(気分の割合) ---
 // SCORE_COLORは隣接色(黄とオレンジ)の弁別性が弱いため、色だけに頼らず
@@ -59,16 +60,15 @@ export function MoodPieChart({ distribution }: { distribution: { score: number; 
         {slices
           .filter((s) => s.share >= 0.08)
           .map((s) => (
-            <text
+            <foreignObject
               key={`label-${s.score}`}
-              x={s.labelPos.x}
-              y={s.labelPos.y}
-              fontSize={11}
-              textAnchor="middle"
-              dominantBaseline="central"
+              x={s.labelPos.x - 9}
+              y={s.labelPos.y - 9}
+              width={18}
+              height={18}
             >
-              {SCORE_EMOJI[s.score]}
-            </text>
+              <MoodFace level={s.score as MoodLevel} size={18} />
+            </foreignObject>
           ))}
       </svg>
       <ul className="pie-legend">
@@ -76,8 +76,8 @@ export function MoodPieChart({ distribution }: { distribution: { score: number; 
           .filter((s) => s.count > 0)
           .map((s) => (
             <li key={s.score}>
-              <span className="pie-legend-swatch" style={{ background: SCORE_COLOR[s.score] }} />
-              {SCORE_EMOJI[s.score]} {s.count}件
+              <MoodFace level={s.score as MoodLevel} size={20} />
+              {s.count}件
             </li>
           ))}
       </ul>

@@ -1,5 +1,57 @@
+:root {
+  --duo-green: #14cf93;
+  --duo-green-dark: #0da875;
+  --duo-green-bg: #d3fbea;
+  --duo-blue: #4d6bff;
+  --duo-blue-dark: #3550da;
+  --duo-blue-bg: #e3e8ff;
+  --duo-red: #ff4b4b;
+  --duo-red-dark: #ea2b2b;
+  --duo-yellow: #ffc800;
+  --duo-yellow-dark: #e6b400;
+  --duo-orange: #ff9600;
+  --duo-orange-dark: #e08600;
+  --duo-text: #4b4b4b;
+  --duo-text-dark: #3c3c3c;
+  --duo-gray: #e5e5e5;
+  --duo-gray-dark: #afafaf;
+  --duo-page-bg: #f7f7f7;
+}
+
 * {
   box-sizing: border-box;
+}
+
+/* 絵文字の代わりに使う、丸くデフォルメしたキャラクターの顔。
+   表示されるたびに(初回描画・地図のピン再生成のたび)ポップに弾んで登場する */
+@keyframes mood-face-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.mood-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+  animation: mood-face-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mood-face svg {
+  display: block;
 }
 
 html, body {
@@ -7,107 +59,177 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
   margin: 0;
-  background: #f5f6f8;
-  color: #222;
+  background: var(--duo-page-bg);
+  color: var(--duo-text-dark);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* --- 投稿フロー --- */
 .post-flow {
   max-width: 420px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 32px 20px 48px;
+  background: linear-gradient(180deg, #eafbe2 0%, var(--duo-page-bg) 280px);
 }
 
 .post-flow h1 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   text-align: center;
-  margin-bottom: 20px;
+  color: var(--duo-text-dark);
+  margin: 8px 0 24px;
 }
 
 .hint {
   text-align: center;
-  color: #666;
+  color: var(--duo-gray-dark);
+  font-weight: 700;
   margin: 16px 0;
 }
 
 .hint.error {
-  color: #c0392b;
+  color: var(--duo-red-dark);
 }
 
 .ward-select select {
   width: 100%;
-  padding: 12px;
+  padding: 14px 16px;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--duo-text-dark);
+  border-radius: 16px;
+  border: 2px solid var(--duo-gray);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.ward-select select:focus {
+  outline: none;
+  border-color: var(--duo-blue);
 }
 
 .ward-display {
+  display: table;
   text-align: center;
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 16px 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--duo-blue-dark);
+  background: var(--duo-blue-bg);
+  border: 2px solid #bfeaff;
+  border-radius: 999px;
+  padding: 8px 20px;
+  margin: 4px auto 24px;
 }
 
 .score-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  margin: 16px 0 4px;
+  gap: 10px;
+  margin: 20px 0 8px;
 }
 
 .score-btn {
   flex: 1;
   aspect-ratio: 1;
-  font-size: 1.8rem;
-  border-radius: 12px;
-  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
   background: white;
   cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease, border-bottom-width 0.08s ease;
+}
+
+.score-btn:hover {
+  background: #fafafa;
+}
+
+.score-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
 }
 
 .score-btn.selected {
-  border-color: #f5a623;
-  background: #fff3e0;
-  font-weight: bold;
+  border-color: var(--duo-blue);
+  border-bottom-color: var(--duo-blue-dark);
+  background: var(--duo-blue-bg);
+  transform: translateY(2px);
+  border-bottom-width: 2px;
 }
 
 .score-labels {
   display: flex;
   justify-content: space-between;
-  color: #888;
-  font-size: 0.85rem;
-  margin-bottom: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0 4px;
+  margin-bottom: 24px;
+}
+
+.score-labels span:first-child {
+  color: var(--duo-blue-dark);
+}
+
+.score-labels span:last-child {
+  color: var(--duo-orange-dark);
 }
 
 .post-flow textarea {
   width: 100%;
-  min-height: 70px;
-  padding: 12px;
+  min-height: 80px;
+  padding: 14px 16px;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: vertical;
   font-family: inherit;
+  color: var(--duo-text-dark);
+  border-radius: 16px;
+  border: 2px solid var(--duo-gray);
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.post-flow textarea:focus {
+  outline: none;
+  border-color: var(--duo-blue);
 }
 
 .submit-btn {
   width: 100%;
-  margin-top: 16px;
-  padding: 14px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  margin-top: 20px;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: white;
-  background: #f5a623;
+  background: var(--duo-green);
   border: none;
-  border-radius: 10px;
+  border-bottom: 4px solid var(--duo-green-dark);
+  border-radius: 16px;
   cursor: pointer;
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #22e6a5;
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
 }
 
 .submit-btn:disabled {
-  background: #ccc;
+  background: var(--duo-gray);
+  border-bottom-color: var(--duo-gray-dark);
+  color: white;
   cursor: not-allowed;
 }
 
@@ -134,6 +256,36 @@ html, #root {
   transition: opacity 0.25s ease;
 }
 
+/* 遠景で雲の上に乗る天気絵文字バッジ */
+/* 外側の.ward-emoji-badgeはLeafletが位置決めにtransformを使うため、
+   拡大縮小のアニメーションは内側の要素に付ける(mood-pinと同じ理由) */
+.ward-emoji-badge {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.pins-visible .ward-emoji-badge {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ward-emoji-badge-inner {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pins-visible .ward-emoji-badge-inner {
+  transform: scale(0.6);
+}
+
 .map-overlay-top {
   position: absolute;
   top: 12px;
@@ -148,17 +300,19 @@ html, #root {
 .overlay-row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
 }
 
+/* 通知(アラート)と同じ並びの吹き出しとして、縦長のカードで表示する */
 .overall {
-  flex: 1;
+  align-self: flex-start;
+  width: min(76%, 260px);
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(4px);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--duo-gray);
+  border-radius: 4px 16px 16px 16px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
 .current-ward {
@@ -171,14 +325,19 @@ html, #root {
 
 .overall-label {
   display: block;
-  color: #888;
-  font-size: 0.7rem;
+  color: var(--duo-gray-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .overall-value {
   display: block;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--duo-text-dark);
+  margin-top: 2px;
 }
 
 .overall-real-weather {
@@ -188,45 +347,130 @@ html, #root {
   color: #666;
 }
 
-.header-buttons {
+/* ハンバーガーメニューボタン(左メニューの開閉トリガー) */
+.menu-toggle-btn {
   flex-shrink: 0;
+  width: 46px;
+  height: 46px;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 14px;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
+  background: rgba(255, 255, 255, 0.96);
+  cursor: pointer;
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
 }
 
-.post-again-btn {
-  flex-shrink: 0;
-  padding: 10px 16px;
-  border-radius: 10px;
+.menu-toggle-btn:hover {
+  background: #fafafa;
+}
+
+.menu-toggle-btn:active {
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+
+.menu-toggle-btn span {
+  display: block;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--duo-text-dark);
+}
+
+/* 左からスライドして出てくるメニュー(マイページ・気分を投稿する) */
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1900;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2000;
+  width: min(78%, 300px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 16px;
+  background: #fff;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.side-menu-open {
+  transform: translateX(0);
+}
+
+.side-menu-close {
+  align-self: flex-end;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  border-radius: 50%;
   border: none;
-  background: #f5a623;
+  background: var(--duo-gray);
+  color: var(--duo-text-dark);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.side-menu-item {
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
+  background: white;
+  color: var(--duo-text-dark);
+  font-weight: 800;
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+}
+
+.side-menu-item:hover {
+  background: #fafafa;
+}
+
+.side-menu-item:active {
+  transform: translateY(3px);
+  border-bottom-width: 2px;
+}
+
+.side-menu-item-primary {
+  border: none;
+  border-bottom: 4px solid var(--duo-blue-dark);
+  background: var(--duo-blue);
   color: white;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  white-space: nowrap;
 }
 
-.mypage-btn {
-  flex-shrink: 0;
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: none;
-  background: rgba(255, 255, 255, 0.92);
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  white-space: nowrap;
+.side-menu-item-primary:hover {
+  background: #6b82ff;
 }
 
+/* AIからの返信はチャットの吹き出しのように右寄せにする(通知は左寄せと対にする)。
+   幅をコンテンツにまかせるとテキストが伸びるたびに横長になってしまうため、
+   幅を固定して文章は下方向に折り返させる */
 .ai-insight {
   position: relative;
+  align-self: flex-end;
+  width: min(76%, 260px);
   padding: 10px 32px 10px 14px;
-  background: rgba(238, 233, 255, 0.95);
-  backdrop-filter: blur(4px);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background: #f3ecff;
+  border: 2px solid #e0d0ff;
+  border-radius: 16px 4px 16px 16px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
 .ai-insight-close {
@@ -247,17 +491,18 @@ html, #root {
 .ai-insight-tag {
   display: inline-block;
   font-size: 0.65rem;
-  font-weight: bold;
+  font-weight: 800;
   color: #fff;
-  background: #7c5cff;
+  background: #ce82ff;
   border-radius: 999px;
-  padding: 1px 8px;
+  padding: 2px 10px;
   margin-bottom: 4px;
 }
 
 .ai-insight-comment {
   margin: 0;
   font-size: 0.8rem;
+  font-weight: 700;
   color: #3a3350;
   line-height: 1.4;
 }
@@ -283,17 +528,21 @@ html, #root {
   background: #fff;
   border: 3px solid #999;
   border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
+  transform: rotate(-45deg) scale(0.4);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pins-visible .mood-pin-shape {
+  transform: rotate(-45deg) scale(1);
 }
 
 .mood-pin-face {
+  display: flex;
   transform: rotate(45deg);
-  font-size: 20px;
-  line-height: 1;
 }
 
 /* 自分の投稿ピンを目立たせる(金色のリング+星バッジ) */
@@ -316,10 +565,10 @@ html, #root {
    縦積み表示にならないよう外側のコンテナ自体に横書きを強制する */
 .mood-popup.leaflet-tooltip {
   background: rgba(255, 255, 255, 0.97);
-  border: none;
-  border-radius: 12px;
+  border: 2px solid var(--duo-gray);
+  border-radius: 14px;
   padding: 5px 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   opacity: 1;
   writing-mode: horizontal-tb !important;
   white-space: normal !important;
@@ -328,12 +577,13 @@ html, #root {
 }
 
 .mood-popup.leaflet-tooltip-top::before {
-  border-top-color: rgba(255, 255, 255, 0.97);
+  border-top-color: var(--duo-gray);
 }
 
 .mood-bubble {
   font-size: 0.72rem;
-  color: #333;
+  font-weight: 700;
+  color: var(--duo-text);
   max-width: 140px;
   white-space: normal;
   word-break: break-word;
@@ -719,17 +969,15 @@ html, #root {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   font-size: 0.72rem;
   color: #444;
 }
 
-.pie-legend-swatch {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  margin-right: 4px;
+.pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pie-empty {

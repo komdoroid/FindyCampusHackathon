@@ -6,7 +6,6 @@ import {
   WARD_MAP,
   WEATHER_LABEL,
   WEATHER_COLOR,
-  SCORE_EMOJI,
   SCORE_COLOR,
   scoreToWeather,
   findNearestWard,
@@ -18,6 +17,7 @@ import {
   type WardDef,
 } from '../shared/wards'
 import { WARD_POLYGONS } from '../shared/wardPolygons'
+import { moodFaceMarkup, weatherToMoodLevel } from './MoodFace'
 
 interface WardSummary {
   ward: string
@@ -65,6 +65,28 @@ function pseudoRandom(seed: number): number {
 }
 
 const wardBoundsCache = new Map<string, ReturnType<typeof polygonBounds>>()
+const wardCentroidCache = new Map<string, [number, number]>()
+
+// 区の天気バッジを置く位置(ポリゴン頂点の重心)。区ごとに固定なのでキャッシュする
+function wardCentroid(wardId: string): [number, number] {
+  let centroid = wardCentroidCache.get(wardId)
+  if (centroid) return centroid
+  const polygon = WARD_POLYGONS[wardId]
+  const fallback = WARD_MAP[wardId]
+  if (!polygon || polygon.length === 0) {
+    centroid = [fallback.lat, fallback.lng]
+  } else {
+    let sumLat = 0
+    let sumLng = 0
+    for (const [lat, lng] of polygon) {
+      sumLat += lat
+      sumLng += lng
+    }
+    centroid = [sumLat / polygon.length, sumLng / polygon.length]
+  }
+  wardCentroidCache.set(wardId, centroid)
+  return centroid
+}
 
 // 区の実際のポリゴン内に収まる位置を疑似乱数で決める(棄却サンプリング)
 function jitterPositionInWard(wardId: string, id: number): [number, number] {
@@ -108,10 +130,12 @@ export function MapView({
   const [insight, setInsight] = useState<Insight | null>(null)
   const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
   const [insightDismissed, setInsightDismissed] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const blobLayersRef = useRef<Map<string, L.Polygon>>(new Map())
   const pinLayerRef = useRef<L.LayerGroup | null>(null)
+  const labelLayerRef = useRef<L.LayerGroup | null>(null)
   const zoomTierRef = useRef<'far' | 'pin'>('far')
   const postsRef = useRef<Post[]>([])
   const renderPinsRef = useRef<() => void>(() => {})
@@ -125,21 +149,52 @@ export function MapView({
     const map = L.map(mapContainerRef.current, {
       center: TOKYO_CENTER,
       zoom: 11,
-      minZoom: 10,
       maxZoom: 16,
-      maxBounds: bounds.pad(0.1),
       maxBoundsViscosity: 1.0,
       zoomControl: true,
     })
-    map.fitBounds(bounds)
     mapRef.current = map
 
-    // 23区の範囲だけ表示すればよいので、負荷を抑えるため描画範囲を絞る
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
+    // 23区の範囲だけ表示すればよいので、負荷を抑えるため描画範囲を絞る。
+    // 標準OSMタイルは道路が原色で主張しすぎるため、地名が日本語表記のまま
+    // 淡い配色になる国土地理院の淡色地図タイルを使い、上に乗せるポップな色と喧嘩しないようにする
+    L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>',
       maxZoom: 18,
       bounds,
     }).addTo(map)
+
+    // コンテナの縦横比とboundsの縦横比が一致しないと、fitBoundsだけでは
+    // 片側に地図の描画範囲外(灰色)が余ってしまう。CSSのbackground-size:coverと同じ考え方で、
+    // boundsが常にコンテナ全体を覆う最小ズームを求めて固定する
+    function coverZoom(): number {
+      const size = map.getSize()
+      if (size.x === 0 || size.y === 0) return 11
+      for (let z = 10; z <= 16; z++) {
+        const nw = map.project(bounds.getNorthWest(), z)
+        const se = map.project(bounds.getSouthEast(), z)
+        if (Math.abs(se.x - nw.x) >= size.x && Math.abs(se.y - nw.y) >= size.y) return z
+      }
+      return 16
+    }
+
+    function applyCoverFit() {
+      const z = coverZoom()
+      map.setMinZoom(z)
+      map.setMaxBounds(bounds.pad(0.1))
+      if (map.getZoom() < z) map.setZoom(z)
+      else map.panInsideBounds(bounds, { animate: false })
+    }
+
+    applyCoverFit()
+    // 初回描画直後はコンテナの実サイズが確定していないことがあるため、次フレームでも補正する
+    requestAnimationFrame(applyCoverFit)
+
+    function handleWindowResize() {
+      map.invalidateSize()
+      applyCoverFit()
+    }
+    window.addEventListener('resize', handleWindowResize)
 
     map.createPane('blobPane')
     const blobPane = map.getPane('blobPane')!
@@ -190,25 +245,31 @@ export function MapView({
     }
     blobLayersRef.current = layers
     pinLayerRef.current = L.layerGroup().addTo(map)
+    labelLayerRef.current = L.layerGroup().addTo(map)
 
-    // pin階層(拡大時)の時だけピンをDOMに追加する。ズームアウト中は空にして負荷を抑える
+    // pin階層(拡大時)の時だけピンをDOMに追加する。ズームアウト中は空にして負荷を抑える。
+    // 投稿数が多いと全件分のDOM(コメント付きは常時吹き出し表示まで)を作ることになり重くなるため、
+    // 今見えている範囲(+少し余裕)に入っているものだけを描画する
     function renderPins() {
       const layerGroup = pinLayerRef.current
       if (!layerGroup) return
       layerGroup.clearLayers()
       if (zoomTierRef.current !== 'pin') return
 
+      const visibleBounds = map.getBounds().pad(0.2)
+
       for (const post of postsRef.current) {
         const ward = WARD_MAP[post.ward]
         if (!ward) continue
         const [lat, lng] = jitterPositionInWard(post.ward, post.id)
+        if (!visibleBounds.contains([lat, lng])) continue
         const mine = post.userId !== null && post.userId === userId
         const marker = L.marker([lat, lng], {
           pane: 'pinPane',
           icon: L.divIcon({
             className: mine ? 'mood-pin mood-pin-mine' : 'mood-pin',
             html: `<div class="mood-pin-shape" style="border-color:${SCORE_COLOR[post.score]}">
-              <span class="mood-pin-face">${SCORE_EMOJI[post.score]}</span>
+              <span class="mood-pin-face">${moodFaceMarkup(post.score as 1 | 2 | 3 | 4 | 5, 26)}</span>
               ${mine ? '<span class="mood-pin-mine-badge">★</span>' : ''}
             </div>`,
             // 涙型の先端は見た目上ボックス上端から40pxの位置にあるため、
@@ -246,11 +307,18 @@ export function MapView({
       blobPane.style.opacity = tier === 'far' ? '0.75' : '0'
       if (tierChanged) renderPins()
     }
+    // ピン表示中にパンした時も、表示範囲が変わるので描画し直す
+    function handleMoveEnd() {
+      if (zoomTierRef.current === 'pin') renderPins()
+    }
     updateZoomTier()
     map.on('zoomend', updateZoomTier)
+    map.on('moveend', handleMoveEnd)
 
     return () => {
       map.off('zoomend', updateZoomTier)
+      map.off('moveend', handleMoveEnd)
+      window.removeEventListener('resize', handleWindowResize)
       map.remove()
       mapRef.current = null
     }
@@ -317,6 +385,8 @@ export function MapView({
   useEffect(() => {
     if (!summary) return
     const wardById = new Map(summary.wards.map((w) => [w.ward, w]))
+    const labelGroup = labelLayerRef.current
+    labelGroup?.clearLayers()
     for (const w of WARDS) {
       const stat = wardById.get(w.id)
       const hasData = Boolean(stat?.enough && stat.weather)
@@ -327,6 +397,21 @@ export function MapView({
           fillColor: hasData ? WEATHER_COLOR[stat!.weather!] : '#cccccc',
           fillOpacity: hasData ? 0.55 : 0,
         })
+      }
+      // 遠景時、雲の上に天気の絵文字バッジを乗せてひと目で分かるポップな見た目にする
+      if (hasData && labelGroup) {
+        const [lat, lng] = wardCentroid(w.id)
+        const marker = L.marker([lat, lng], {
+          pane: 'labelPane',
+          interactive: false,
+          icon: L.divIcon({
+            className: 'ward-emoji-badge',
+            html: `<div class="ward-emoji-badge-inner">${moodFaceMarkup(weatherToMoodLevel(stat!.weather!), 26)}</div>`,
+            iconSize: [36, 36],
+            iconAnchor: [18, 18],
+          }),
+        })
+        labelGroup.addLayer(marker)
       }
     }
   }, [summary])
@@ -346,29 +431,32 @@ export function MapView({
     <div className="map-view">
       <div className="map-overlay-top">
         <div className="overlay-row">
-          <div className="overall">
-            {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
-            <span className="overall-label">東京全体の気分</span>
-            <span className="overall-value">
-              {summary?.overall !== null && summary?.overall !== undefined
-                ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
-                : '集計中…'}
+          <button
+            type="button"
+            className="menu-toggle-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="メニューを開く"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+
+        <div className="overall">
+          {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
+          <span className="overall-label">東京全体の気分</span>
+          <span className="overall-value">
+            {summary?.overall !== null && summary?.overall !== undefined
+              ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
+              : '集計中…'}
+          </span>
+          {insight?.weather && (
+            <span className="overall-real-weather">
+              天気: {insight.weather.emoji} {insight.weather.label}
+              {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
             </span>
-            {insight?.weather && (
-              <span className="overall-real-weather">
-                天気: {insight.weather.emoji} {insight.weather.label}
-                {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
-              </span>
-            )}
-          </div>
-          <div className="header-buttons">
-            <button type="button" className="mypage-btn" onClick={onOpenMyPage}>
-              マイページ
-            </button>
-            <button type="button" className="post-again-btn" onClick={onPostAgain}>
-              気分を投稿する
-            </button>
-          </div>
+          )}
         </div>
 
         {insight?.comment && !insightDismissed && (
@@ -388,6 +476,38 @@ export function MapView({
       </div>
 
       <div ref={mapContainerRef} className="leaflet-container" />
+
+      {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
+      <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
+        <button
+          type="button"
+          className="side-menu-close"
+          onClick={() => setMenuOpen(false)}
+          aria-label="メニューを閉じる"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          className="side-menu-item side-menu-item-primary"
+          onClick={() => {
+            setMenuOpen(false)
+            onPostAgain()
+          }}
+        >
+          気分を投稿する
+        </button>
+        <button
+          type="button"
+          className="side-menu-item"
+          onClick={() => {
+            setMenuOpen(false)
+            onOpenMyPage()
+          }}
+        >
+          マイページ
+        </button>
+      </nav>
     </div>
   )
 }
