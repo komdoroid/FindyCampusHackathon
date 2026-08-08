@@ -148,7 +148,6 @@ export function MapView({
   const [posts, setPosts] = useState<Post[]>([])
   const [insight, setInsight] = useState<Insight | null>(null)
   const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const blobLayersRef = useRef<Map<string, L.Polygon>>(new Map())
@@ -442,44 +441,42 @@ export function MapView({
 
   return (
     <div className="map-view">
-      {insight?.latestPost && (
-        <header className="map-header">
-          <div className="map-header-post">
-            <MoodFace level={insight.latestPost.score as MoodLevel} size={40} />
-            <div className="map-header-post-text">
-              <span className="map-header-post-ward">
-                {WARD_MAP[insight.latestPost.ward]?.name ?? insight.latestPost.ward}
-                <span className="map-header-post-time">{formatDateTime(insight.latestPost.createdAt)}</span>
-              </span>
-              {insight.latestPost.comment && (
-                <span className="map-header-post-comment">「{insight.latestPost.comment}」</span>
-              )}
+      <header className="map-header">
+        <div className="map-header-nav">
+          <button type="button" className="map-header-nav-btn map-header-nav-btn-primary" onClick={onPostAgain}>
+            気分を投稿する
+          </button>
+          <button type="button" className="map-header-nav-btn" onClick={onOpenMyPage}>
+            マイページ
+          </button>
+        </div>
+
+        {insight?.latestPost && (
+          <>
+            <div className="map-header-post">
+              <MoodFace level={insight.latestPost.score as MoodLevel} size={40} />
+              <div className="map-header-post-text">
+                <span className="map-header-post-ward">
+                  {WARD_MAP[insight.latestPost.ward]?.name ?? insight.latestPost.ward}
+                  <span className="map-header-post-time">{formatDateTime(insight.latestPost.createdAt)}</span>
+                </span>
+                {insight.latestPost.comment && (
+                  <span className="map-header-post-comment">「{insight.latestPost.comment}」</span>
+                )}
+              </div>
             </div>
-          </div>
-          {insight.comment && (
-            <div className="map-header-ai">
-              <span className="map-header-ai-tag">AIによるあなたの気分分析</span>
-              <p className="map-header-ai-comment">{insight.comment}</p>
-            </div>
-          )}
-        </header>
-      )}
+            {insight.comment && (
+              <div className="map-header-ai">
+                <span className="map-header-ai-tag">AIによるあなたの気分分析</span>
+                <p className="map-header-ai-comment">{insight.comment}</p>
+              </div>
+            )}
+          </>
+        )}
+      </header>
 
       <div className="map-canvas">
         <div className="map-overlay-top">
-          <div className="overlay-row">
-            <button
-              type="button"
-              className="menu-toggle-btn"
-              onClick={() => setMenuOpen(true)}
-              aria-label="メニューを開く"
-            >
-              <span />
-              <span />
-              <span />
-            </button>
-          </div>
-
           <div className="overall">
             {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
             <span className="overall-label">東京全体の気分</span>
@@ -498,38 +495,6 @@ export function MapView({
         </div>
 
         <div ref={mapContainerRef} className="leaflet-container" />
-
-        {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
-        <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
-          <button
-            type="button"
-            className="side-menu-close"
-            onClick={() => setMenuOpen(false)}
-            aria-label="メニューを閉じる"
-          >
-            ×
-          </button>
-          <button
-            type="button"
-            className="side-menu-item side-menu-item-primary"
-            onClick={() => {
-              setMenuOpen(false)
-              onPostAgain()
-            }}
-          >
-            気分を投稿する
-          </button>
-          <button
-            type="button"
-            className="side-menu-item"
-            onClick={() => {
-              setMenuOpen(false)
-              onOpenMyPage()
-            }}
-          >
-            マイページ
-          </button>
-        </nav>
       </div>
     </div>
   )

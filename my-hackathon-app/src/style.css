@@ -304,12 +304,6 @@ html, #root {
   gap: 8px;
 }
 
-.overlay-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-}
-
 /* 通知(アラート)と同じ並びの吹き出しとして、縦長のカードで表示する */
 .overall {
   align-self: flex-start;
@@ -354,115 +348,45 @@ html, #root {
   color: #666;
 }
 
-/* ハンバーガーメニューボタン(左メニューの開閉トリガー) */
-.menu-toggle-btn {
-  flex-shrink: 0;
-  width: 46px;
-  height: 46px;
+/* マップ画面ヘッダーのページ遷移ボタン(気分を投稿する / マイページ)。
+   ページがこの2つしかないため、常時ヘッダーに置いて開閉メニューは廃止した */
+.map-header-nav {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 14px;
-  border: 2px solid var(--duo-gray);
-  border-bottom: 4px solid var(--duo-gray);
-  background: rgba(255, 255, 255, 0.96);
-  cursor: pointer;
-  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+  gap: 8px;
 }
 
-.menu-toggle-btn:hover {
-  background: #fafafa;
-}
-
-.menu-toggle-btn:active {
-  transform: translateY(3px);
-  border-bottom-width: 2px;
-}
-
-.menu-toggle-btn span {
-  display: block;
-  width: 20px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--duo-text-dark);
-}
-
-/* 左からスライドして出てくるメニュー(マイページ・気分を投稿する) */
-.side-menu-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 1900;
-}
-
-.side-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 2000;
-  width: min(78%, 300px);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 24px 16px;
-  background: #fff;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
-  transform: translateX(-100%);
-  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-.side-menu-open {
-  transform: translateX(0);
-}
-
-.side-menu-close {
-  align-self: flex-end;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 8px;
-  border-radius: 50%;
-  border: none;
-  background: var(--duo-gray);
-  color: var(--duo-text-dark);
-  font-size: 1.2rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.side-menu-item {
-  padding: 14px 18px;
+.map-header-nav-btn {
+  flex: 1;
+  padding: 10px 12px;
   border-radius: 14px;
   border: 2px solid var(--duo-gray);
   border-bottom: 4px solid var(--duo-gray);
   background: white;
   color: var(--duo-text-dark);
   font-weight: 800;
-  font-size: 1rem;
-  text-align: left;
+  font-size: 0.85rem;
+  text-align: center;
   cursor: pointer;
   transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
 }
 
-.side-menu-item:hover {
+.map-header-nav-btn:hover {
   background: #fafafa;
 }
 
-.side-menu-item:active {
+.map-header-nav-btn:active {
   transform: translateY(3px);
   border-bottom-width: 2px;
 }
 
-.side-menu-item-primary {
+.map-header-nav-btn-primary {
   border: none;
   border-bottom: 4px solid var(--duo-blue-dark);
   background: var(--duo-blue);
   color: white;
 }
 
-.side-menu-item-primary:hover {
+.map-header-nav-btn-primary:hover {
   background: #6b82ff;
 }
 
@@ -855,37 +779,93 @@ html, #root {
 }
 
 /* --- プロフィールカード --- */
-.profile-card-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 16px;
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.profile-recent {
-  grid-column: 1;
-  grid-row: 1 / span 2;
+/* KPIのスタットタイル行 */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.stat-tile {
+  background: #f8f9fb;
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.profile-recent-label {
+.stat-tile-label {
   font-size: 0.7rem;
+  color: #888;
+  font-weight: 600;
+}
+
+.stat-tile-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  line-height: 1.2;
+}
+
+.stat-tile-sub {
+  font-size: 0.72rem;
   color: #999;
 }
 
-.profile-recent-ward {
-  font-size: 1rem;
-  font-weight: bold;
+/* 各セクション共通のカード */
+.profile-section {
+  background: #f8f9fb;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.profile-section-title {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 14px;
+}
+
+.profile-recent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .profile-recent-mood {
-  font-size: 1.6rem;
+  font-size: 2.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.profile-recent-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.profile-recent-ward {
+  font-size: 1.05rem;
+  font-weight: bold;
+}
+
+.profile-recent-weather {
+  font-size: 0.85rem;
+  color: #666;
 }
 
 .profile-recent-comment {
-  margin: 4px 0;
+  margin: 2px 0 0;
   font-size: 0.85rem;
   color: #555;
 }
@@ -895,42 +875,9 @@ html, #root {
   color: #999;
 }
 
-.profile-total {
-  margin-top: auto;
-  padding-top: 12px;
-  font-size: 0.78rem;
-  color: #666;
-  font-weight: bold;
-}
-
-.profile-pie {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.profile-line {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.profile-chart-label {
-  display: block;
-  font-size: 0.72rem;
-  color: #999;
-  margin-bottom: 4px;
-}
-
 @media (max-width: 640px) {
-  .profile-card-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-
-  .profile-recent,
-  .profile-pie,
-  .profile-line {
-    grid-column: 1;
-    grid-row: auto;
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -982,37 +929,58 @@ html, #root {
   color: #666;
 }
 
-/* --- 円グラフ --- */
-.pie-wrap {
+/* --- 気分の割合(積み上げバー) --- */
+.dist-bar-wrap {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.pie-svg {
-  width: 100px;
-  height: 100px;
-  flex-shrink: 0;
+.dist-bar-track {
+  display: flex;
+  width: 100%;
+  height: 34px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
-.pie-legend {
+.dist-bar-segment {
+  min-width: 4px;
+  border-right: 2px solid #f8f9fb;
+}
+
+.dist-bar-segment:last-child {
+  border-right: none;
+}
+
+.dist-bar-legend {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 0.72rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+  font-size: 0.8rem;
   color: #444;
 }
 
-.pie-legend li {
+.dist-bar-legend li {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
-.pie-empty {
+.dist-bar-legend-count {
+  font-weight: 700;
+  color: #222;
+}
+
+.dist-bar-legend-pct {
+  color: #999;
+  font-size: 0.75rem;
+}
+
+.chart-empty {
   font-size: 0.78rem;
   color: #999;
   padding: 20px 0;
@@ -1021,8 +989,8 @@ html, #root {
 /* --- 折れ線グラフ --- */
 .line-svg {
   width: 100%;
-  max-width: 240px;
   height: auto;
+  display: block;
 }
 
 /* --- コミットカレンダー --- */
@@ -1036,31 +1004,42 @@ html, #root {
   gap: 8px;
 }
 
+.commit-calendar-summary {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.commit-calendar-summary strong {
+  color: #222;
+  font-size: 0.95rem;
+}
+
 .commit-calendar-grid {
   display: grid;
-  grid-auto-rows: 12px;
-  gap: 3px;
+  grid-auto-rows: 16px;
+  gap: 4px;
 }
 
 .commit-calendar-month {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   color: #999;
   white-space: nowrap;
 }
 
 .commit-calendar-weekday {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: #999;
   display: flex;
   align-items: center;
-  height: 12px;
+  height: 16px;
   line-height: 1;
 }
 
 .commit-calendar-cell {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
 }
 
 .commit-calendar-legend {
