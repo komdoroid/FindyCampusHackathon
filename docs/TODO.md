@@ -39,3 +39,15 @@
   - `src/style.css`: `.alerts` / `.alert` / `.alert-low` / `.alert-high` を削除
   - `src/shared/wards.ts`: 未使用になった`ALERT_LOW` / `ALERT_HIGH`定数を削除
   - ビルド確認後、本番にデプロイ済み (Version ID: 36020b0e-e518-441c-934c-1fa968651ab1)
+
+- [x] リモート(origin/main)との差分をマージ (2026-08-08)
+  - origin側の2コミット（Duolingo風UIリデザイン、MoodFaceカートゥーンアイコン化、レイアウト調整、シード量削減）を`git merge`で取り込み
+  - コンフリクトは`style.css`（区アラート用スタイルは機能削除に合わせてこちら側を採用）と`migrations/seed.sql`（生成物のため`scripts/seed.mjs`から再生成）の2件のみ。他は自動マージ
+  - GitHubにpush済み (`defbaa3`)、本番デプロイ済み
+
+- [x] マップ画面に「直近の自分の投稿+AI分析」のヘッダーを実装 (2026-08-08)
+  - `src/index.tsx`: `/api/insight`のレスポンスに直近投稿(`latestPost`: ward/score/comment/createdAt)を追加
+  - `src/client/MapView.tsx`: 画面最上部に`<header class="map-header">`を新設。MoodFace(気分アイコン)+区名+時刻+コメントと、それに対するAI分析コメントを表示。旧`.ai-insight`吹き出し(dismiss可能なポップアップ)は廃止し、常時表示のヘッダーに統合
+  - `src/style.css`: `.map-view`をflex-columnにし、地図とオーバーレイを`.map-canvas`(flex:1)にまとめることで、ヘッダー分の高さが地図の描画範囲を圧迫しないよう修正
+  - Playwright(chromium)でローカルdevサーバーを実際にブラウザ表示して動作確認済み（テスト投稿を作成し、ヘッダーに氏名・コメント・AI分析が正しく表示されることをスクリーンショットで確認、コンソールエラーなし。確認後テストデータは削除）
+  - GitHubにpush済み (`2bf0e74`)、本番デプロイ済み (Version ID: 3ff89a90-c501-429e-8c1d-a0ca996e8c49)
