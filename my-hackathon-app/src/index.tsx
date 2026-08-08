@@ -113,6 +113,12 @@ app.get('/', async (c) => {
           <ViteClient />
           <ReactRefresh />
           <Script src="/src/client/index.tsx" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap"
+            rel="stylesheet"
+          />
           <Link href="/src/style.css" rel="stylesheet" />
         </head>
         <body>

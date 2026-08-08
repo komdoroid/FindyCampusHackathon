@@ -1,3 +1,23 @@
+:root {
+  --duo-green: #58cc02;
+  --duo-green-dark: #58a700;
+  --duo-green-bg: #d7ffb8;
+  --duo-blue: #1cb0f6;
+  --duo-blue-dark: #1899d6;
+  --duo-blue-bg: #ddf4ff;
+  --duo-red: #ff4b4b;
+  --duo-red-dark: #ea2b2b;
+  --duo-yellow: #ffc800;
+  --duo-yellow-dark: #e6b400;
+  --duo-orange: #ff9600;
+  --duo-orange-dark: #e08600;
+  --duo-text: #4b4b4b;
+  --duo-text-dark: #3c3c3c;
+  --duo-gray: #e5e5e5;
+  --duo-gray-dark: #afafaf;
+  --duo-page-bg: #f7f7f7;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -7,107 +27,178 @@ html, body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
   margin: 0;
-  background: #f5f6f8;
-  color: #222;
+  background: var(--duo-page-bg);
+  color: var(--duo-text-dark);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* --- 投稿フロー --- */
 .post-flow {
   max-width: 420px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 32px 20px 48px;
+  background: linear-gradient(180deg, #eafbe2 0%, var(--duo-page-bg) 280px);
 }
 
 .post-flow h1 {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   text-align: center;
-  margin-bottom: 20px;
+  color: var(--duo-text-dark);
+  margin: 8px 0 24px;
 }
 
 .hint {
   text-align: center;
-  color: #666;
+  color: var(--duo-gray-dark);
+  font-weight: 700;
   margin: 16px 0;
 }
 
 .hint.error {
-  color: #c0392b;
+  color: var(--duo-red-dark);
 }
 
 .ward-select select {
   width: 100%;
-  padding: 12px;
+  padding: 14px 16px;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--duo-text-dark);
+  border-radius: 16px;
+  border: 2px solid var(--duo-gray);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.ward-select select:focus {
+  outline: none;
+  border-color: var(--duo-blue);
 }
 
 .ward-display {
+  display: table;
   text-align: center;
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 16px 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--duo-blue-dark);
+  background: var(--duo-blue-bg);
+  border: 2px solid #bfeaff;
+  border-radius: 999px;
+  padding: 8px 20px;
+  margin: 4px auto 24px;
 }
 
 .score-buttons {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  margin: 16px 0 4px;
+  gap: 10px;
+  margin: 20px 0 8px;
 }
 
 .score-btn {
   flex: 1;
   aspect-ratio: 1;
-  font-size: 1.8rem;
-  border-radius: 12px;
-  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+  border-radius: 18px;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
   background: white;
   cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease, border-bottom-width 0.08s ease;
+}
+
+.score-btn:hover {
+  background: #fafafa;
+}
+
+.score-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
 }
 
 .score-btn.selected {
-  border-color: #f5a623;
-  background: #fff3e0;
-  font-weight: bold;
+  border-color: var(--duo-blue);
+  border-bottom-color: var(--duo-blue-dark);
+  background: var(--duo-blue-bg);
+  transform: translateY(2px);
+  border-bottom-width: 2px;
 }
 
 .score-labels {
   display: flex;
   justify-content: space-between;
-  color: #888;
-  font-size: 0.85rem;
-  margin-bottom: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0 4px;
+  margin-bottom: 24px;
+}
+
+.score-labels span:first-child {
+  color: var(--duo-blue-dark);
+}
+
+.score-labels span:last-child {
+  color: var(--duo-orange-dark);
 }
 
 .post-flow textarea {
   width: 100%;
-  min-height: 70px;
-  padding: 12px;
+  min-height: 80px;
+  padding: 14px 16px;
   font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  resize: vertical;
   font-family: inherit;
+  color: var(--duo-text-dark);
+  border-radius: 16px;
+  border: 2px solid var(--duo-gray);
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.post-flow textarea:focus {
+  outline: none;
+  border-color: var(--duo-blue);
 }
 
 .submit-btn {
   width: 100%;
-  margin-top: 16px;
-  padding: 14px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  margin-top: 20px;
+  padding: 16px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   color: white;
-  background: #f5a623;
+  background: var(--duo-green);
   border: none;
-  border-radius: 10px;
+  border-bottom: 4px solid var(--duo-green-dark);
+  border-radius: 16px;
   cursor: pointer;
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #61d602;
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
 }
 
 .submit-btn:disabled {
-  background: #ccc;
+  background: var(--duo-gray);
+  border-bottom-color: var(--duo-gray-dark);
+  color: white;
   cursor: not-allowed;
 }
 
@@ -134,6 +225,37 @@ html, #root {
   transition: opacity 0.25s ease;
 }
 
+/* 遠景で雲の上に乗る天気絵文字バッジ */
+/* 外側の.ward-emoji-badgeはLeafletが位置決めにtransformを使うため、
+   拡大縮小のアニメーションは内側の要素に付ける(mood-pinと同じ理由) */
+.ward-emoji-badge {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.pins-visible .ward-emoji-badge {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ward-emoji-badge-inner {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pins-visible .ward-emoji-badge-inner {
+  transform: scale(0.6);
+}
+
 .map-overlay-top {
   position: absolute;
   top: 12px;
@@ -148,40 +270,56 @@ html, #root {
 
 .overall {
   flex: 1;
-  padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.92);
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(4px);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--duo-gray);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
 .overall-label {
   display: block;
-  color: #888;
-  font-size: 0.75rem;
+  color: var(--duo-gray-dark);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .overall-value {
   display: block;
-  font-size: 1.3rem;
-  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--duo-text-dark);
+  margin-top: 2px;
 }
 
 .post-again-btn {
   flex-shrink: 0;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 12px 18px;
+  border-radius: 14px;
   border: none;
-  background: #f5a623;
+  border-bottom: 4px solid var(--duo-blue-dark);
+  background: var(--duo-blue);
   color: white;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+}
+
+.post-again-btn:hover {
+  background: #3dc0fb;
+}
+
+.post-again-btn:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
 }
 
 .alerts {
   position: absolute;
-  top: 66px;
+  top: 70px;
   left: 12px;
   right: 12px;
   z-index: 1000;
@@ -191,20 +329,24 @@ html, #root {
 }
 
 .alert {
-  padding: 10px 14px;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
   font-size: 0.85rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  border: 2px solid transparent;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .alert-low {
-  background: rgba(227, 242, 253, 0.95);
-  color: #1565c0;
+  background: var(--duo-blue-bg);
+  color: var(--duo-blue-dark);
+  border-color: #bfeaff;
 }
 
 .alert-high {
-  background: rgba(255, 243, 224, 0.95);
-  color: #e65100;
+  background: #fff2d6;
+  color: var(--duo-orange-dark);
+  border-color: #ffe1a3;
 }
 
 /* 個別投稿の気分ピン: 逆しずく型(円の上部に顔)。拡大した時だけ表示 */
@@ -227,11 +369,16 @@ html, #root {
   background: #fff;
   border: 3px solid #999;
   border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg);
+  transform: rotate(-45deg) scale(0.4);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pins-visible .mood-pin-shape {
+  transform: rotate(-45deg) scale(1);
 }
 
 .mood-pin-face {
@@ -245,10 +392,10 @@ html, #root {
    縦積み表示にならないよう外側のコンテナ自体に横書きを強制する */
 .mood-popup.leaflet-tooltip {
   background: rgba(255, 255, 255, 0.97);
-  border: none;
-  border-radius: 12px;
+  border: 2px solid var(--duo-gray);
+  border-radius: 14px;
   padding: 5px 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   opacity: 1;
   writing-mode: horizontal-tb !important;
   white-space: normal !important;
@@ -257,12 +404,13 @@ html, #root {
 }
 
 .mood-popup.leaflet-tooltip-top::before {
-  border-top-color: rgba(255, 255, 255, 0.97);
+  border-top-color: var(--duo-gray);
 }
 
 .mood-bubble {
   font-size: 0.72rem;
-  color: #333;
+  font-weight: 700;
+  color: var(--duo-text);
   max-width: 140px;
   white-space: normal;
   word-break: break-word;
