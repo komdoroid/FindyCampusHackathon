@@ -380,10 +380,11 @@ app.get('/api/insight', async (c) => {
       .bind(userId)
       .first<UserInsightRow>(),
     c.env.DB.prepare(
-      'SELECT created_at as createdAt FROM moods WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+      `SELECT ward, score, comment, created_at as createdAt
+       FROM moods WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`
     )
       .bind(userId)
-      .first<{ createdAt: string }>(),
+      .first<{ ward: string; score: number; comment: string | null; createdAt: string }>(),
   ])
 
   // キャッシュ生成後に新しい投稿があれば、TTL内でも必ず再生成する
@@ -409,6 +410,9 @@ app.get('/api/insight', async (c) => {
     postCount: row.post_count,
     comment: row.comment,
     generatedAt: row.generated_at,
+    latestPost: latestPost
+      ? { ward: latestPost.ward, score: latestPost.score, comment: latestPost.comment, createdAt: latestPost.createdAt }
+      : null,
   })
 })
 

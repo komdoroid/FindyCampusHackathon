@@ -17,7 +17,7 @@ import {
   type WardDef,
 } from '../shared/wards'
 import { WARD_POLYGONS } from '../shared/wardPolygons'
-import { moodFaceMarkup, weatherToMoodLevel } from './MoodFace'
+import { MoodFace, moodFaceMarkup, weatherToMoodLevel, type MoodLevel } from './MoodFace'
 
 interface WardSummary {
   ward: string
@@ -43,11 +43,30 @@ interface Post {
   createdAt: string
 }
 
+interface LatestPost {
+  ward: string
+  score: number
+  comment: string | null
+  createdAt: string
+}
+
 interface Insight {
   weather: { label: string; emoji: string; temp: number | null } | null
   postCount: number
   comment: string
   generatedAt: string
+  latestPost: LatestPost | null
+}
+
+function formatDateTime(iso: string): string {
+  // DBの保存形式は "YYYY-MM-DD HH:MM:SS" (UTC)
+  const d = new Date(`${iso.replace(' ', 'T')}Z`)
+  return d.toLocaleString('ja-JP', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 const REFRESH_MS = 30_000
@@ -129,7 +148,6 @@ export function MapView({
   const [posts, setPosts] = useState<Post[]>([])
   const [insight, setInsight] = useState<Insight | null>(null)
   const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
-  const [insightDismissed, setInsightDismissed] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
@@ -422,92 +440,97 @@ export function MapView({
     renderPinsRef.current()
   }, [posts])
 
-  // AI分析の内容が新しくなったら、閉じていても再度表示する
-  useEffect(() => {
-    setInsightDismissed(false)
-  }, [insight?.generatedAt])
-
   return (
     <div className="map-view">
-      <div className="map-overlay-top">
-        <div className="overlay-row">
-          <button
-            type="button"
-            className="menu-toggle-btn"
-            onClick={() => setMenuOpen(true)}
-            aria-label="メニューを開く"
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-        </div>
-
-        <div className="overall">
-          {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
-          <span className="overall-label">東京全体の気分</span>
-          <span className="overall-value">
-            {summary?.overall !== null && summary?.overall !== undefined
-              ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
-              : '集計中…'}
-          </span>
-          {insight?.weather && (
-            <span className="overall-real-weather">
-              天気: {insight.weather.emoji} {insight.weather.label}
-              {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
-            </span>
+      {insight?.latestPost && (
+        <header className="map-header">
+          <div className="map-header-post">
+            <MoodFace level={insight.latestPost.score as MoodLevel} size={40} />
+            <div className="map-header-post-text">
+              <span className="map-header-post-ward">
+                {WARD_MAP[insight.latestPost.ward]?.name ?? insight.latestPost.ward}
+                <span className="map-header-post-time">{formatDateTime(insight.latestPost.createdAt)}</span>
+              </span>
+              {insight.latestPost.comment && (
+                <span className="map-header-post-comment">「{insight.latestPost.comment}」</span>
+              )}
+            </div>
+          </div>
+          {insight.comment && (
+            <div className="map-header-ai">
+              <span className="map-header-ai-tag">AIによるあなたの気分分析</span>
+              <p className="map-header-ai-comment">{insight.comment}</p>
+            </div>
           )}
-        </div>
+        </header>
+      )}
 
-        {insight?.comment && !insightDismissed && (
-          <div className="ai-insight">
+      <div className="map-canvas">
+        <div className="map-overlay-top">
+          <div className="overlay-row">
             <button
               type="button"
-              className="ai-insight-close"
-              onClick={() => setInsightDismissed(true)}
-              aria-label="閉じる"
+              className="menu-toggle-btn"
+              onClick={() => setMenuOpen(true)}
+              aria-label="メニューを開く"
             >
-              ×
+              <span />
+              <span />
+              <span />
             </button>
-            <span className="ai-insight-tag">AIによるあなたの気分分析</span>
-            <p className="ai-insight-comment">{insight.comment}</p>
           </div>
-        )}
+
+          <div className="overall">
+            {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
+            <span className="overall-label">東京全体の気分</span>
+            <span className="overall-value">
+              {summary?.overall !== null && summary?.overall !== undefined
+                ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
+                : '集計中…'}
+            </span>
+            {insight?.weather && (
+              <span className="overall-real-weather">
+                天気: {insight.weather.emoji} {insight.weather.label}
+                {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div ref={mapContainerRef} className="leaflet-container" />
+
+        {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
+        <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
+          <button
+            type="button"
+            className="side-menu-close"
+            onClick={() => setMenuOpen(false)}
+            aria-label="メニューを閉じる"
+          >
+            ×
+          </button>
+          <button
+            type="button"
+            className="side-menu-item side-menu-item-primary"
+            onClick={() => {
+              setMenuOpen(false)
+              onPostAgain()
+            }}
+          >
+            気分を投稿する
+          </button>
+          <button
+            type="button"
+            className="side-menu-item"
+            onClick={() => {
+              setMenuOpen(false)
+              onOpenMyPage()
+            }}
+          >
+            マイページ
+          </button>
+        </nav>
       </div>
-
-      <div ref={mapContainerRef} className="leaflet-container" />
-
-      {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
-      <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
-        <button
-          type="button"
-          className="side-menu-close"
-          onClick={() => setMenuOpen(false)}
-          aria-label="メニューを閉じる"
-        >
-          ×
-        </button>
-        <button
-          type="button"
-          className="side-menu-item side-menu-item-primary"
-          onClick={() => {
-            setMenuOpen(false)
-            onPostAgain()
-          }}
-        >
-          気分を投稿する
-        </button>
-        <button
-          type="button"
-          className="side-menu-item"
-          onClick={() => {
-            setMenuOpen(false)
-            onOpenMyPage()
-          }}
-        >
-          マイページ
-        </button>
-      </nav>
     </div>
   )
 }
