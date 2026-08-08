@@ -422,6 +422,8 @@ app.get('/', async (c) => {
     await renderToReadableStream(
       <html>
         <head>
+          <meta charSet="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
           <ViteClient />
           <ReactRefresh />
           <Script src="/src/client/index.tsx" />

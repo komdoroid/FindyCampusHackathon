@@ -348,45 +348,119 @@ html, #root {
   color: #666;
 }
 
-/* マップ画面ヘッダーのページ遷移ボタン(気分を投稿する / マイページ)。
-   ページがこの2つしかないため、常時ヘッダーに置いて開閉メニューは廃止した */
-.map-header-nav {
+/* マップ画面ヘッダーのハンバーガーメニュー(気分を投稿する / マイページへの導線) */
+.map-header-top {
   display: flex;
-  gap: 8px;
+  align-items: center;
 }
 
-.map-header-nav-btn {
-  flex: 1;
-  padding: 10px 12px;
+.menu-toggle-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 12px;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
+  background: white;
+  cursor: pointer;
+  transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
+}
+
+.menu-toggle-btn:hover {
+  background: #fafafa;
+}
+
+.menu-toggle-btn:active {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+
+.menu-toggle-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--duo-text-dark);
+}
+
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1900;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2000;
+  width: min(78%, 280px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 16px;
+  background: #fff;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.side-menu-open {
+  transform: translateX(0);
+}
+
+.side-menu-close {
+  align-self: flex-end;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f0f0;
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.side-menu-item {
+  padding: 14px 16px;
   border-radius: 14px;
   border: 2px solid var(--duo-gray);
   border-bottom: 4px solid var(--duo-gray);
   background: white;
   color: var(--duo-text-dark);
   font-weight: 800;
-  font-size: 0.85rem;
-  text-align: center;
+  font-size: 0.95rem;
+  text-align: left;
   cursor: pointer;
   transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
 }
 
-.map-header-nav-btn:hover {
+.side-menu-item:hover {
   background: #fafafa;
 }
 
-.map-header-nav-btn:active {
-  transform: translateY(3px);
+.side-menu-item:active {
+  transform: translateY(2px);
   border-bottom-width: 2px;
 }
 
-.map-header-nav-btn-primary {
+.side-menu-item-primary {
   border: none;
   border-bottom: 4px solid var(--duo-blue-dark);
   background: var(--duo-blue);
   color: white;
 }
 
-.map-header-nav-btn-primary:hover {
+.side-menu-item-primary:hover {
   background: #6b82ff;
 }
 
@@ -544,6 +618,51 @@ html, #root {
   white-space: normal;
   word-break: break-word;
   line-height: 1.3;
+}
+
+/* スマホ幅では文字が小さく感じやすい箇所(地図ヘッダー・天気カード・ピンの吹き出し)を
+   少し大きくして読みやすくする */
+@media (max-width: 480px) {
+  .overall {
+    width: min(88%, 300px);
+  }
+
+  .overall-label {
+    font-size: 0.76rem;
+  }
+
+  .overall-value {
+    font-size: 1.35rem;
+  }
+
+  .overall-real-weather {
+    font-size: 0.8rem;
+  }
+
+  .current-ward {
+    font-size: 0.84rem;
+  }
+
+  .map-header-post-ward {
+    font-size: 0.92rem;
+  }
+
+  .map-header-post-time {
+    font-size: 0.74rem;
+  }
+
+  .map-header-post-comment {
+    font-size: 0.84rem;
+    white-space: normal;
+  }
+
+  .map-header-ai-comment {
+    font-size: 0.86rem;
+  }
+
+  .mood-bubble {
+    font-size: 0.78rem;
+  }
 }
 
 /* --- モーダル(気分投稿・マイページ) --- */

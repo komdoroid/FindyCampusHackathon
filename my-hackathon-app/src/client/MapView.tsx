@@ -148,6 +148,7 @@ export function MapView({
   const [posts, setPosts] = useState<Post[]>([])
   const [insight, setInsight] = useState<Insight | null>(null)
   const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const blobLayersRef = useRef<Map<string, L.Polygon>>(new Map())
@@ -442,12 +443,16 @@ export function MapView({
   return (
     <div className="map-view">
       <header className="map-header">
-        <div className="map-header-nav">
-          <button type="button" className="map-header-nav-btn map-header-nav-btn-primary" onClick={onPostAgain}>
-            気分を投稿する
-          </button>
-          <button type="button" className="map-header-nav-btn" onClick={onOpenMyPage}>
-            マイページ
+        <div className="map-header-top">
+          <button
+            type="button"
+            className="menu-toggle-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="メニューを開く"
+          >
+            <span />
+            <span />
+            <span />
           </button>
         </div>
 
@@ -474,6 +479,38 @@ export function MapView({
           </>
         )}
       </header>
+
+      {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
+      <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
+        <button
+          type="button"
+          className="side-menu-close"
+          onClick={() => setMenuOpen(false)}
+          aria-label="メニューを閉じる"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          className="side-menu-item side-menu-item-primary"
+          onClick={() => {
+            setMenuOpen(false)
+            onPostAgain()
+          }}
+        >
+          気分を投稿する
+        </button>
+        <button
+          type="button"
+          className="side-menu-item"
+          onClick={() => {
+            setMenuOpen(false)
+            onOpenMyPage()
+          }}
+        >
+          マイページ
+        </button>
+      </nav>
 
       <div className="map-canvas">
         <div className="map-overlay-top">

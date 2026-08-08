@@ -1,85 +1,42 @@
-import { SCORE_COLOR, SCORE_EMOJI } from '../shared/wards'
+import { SCORE_COLOR } from '../shared/wards'
 import { MoodFace, type MoodLevel } from './MoodFace'
 
-// --- 円グラフ(気分の割合) ---
+// --- 積み上げバー(気分の割合) ---
 // SCORE_COLORは隣接色(黄とオレンジ)の弁別性が弱いため、色だけに頼らず
-// 各スライスに直接ラベル(絵文字)を置き、凡例もテキストで併記する(secondary encoding)
-function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
-  const rad = ((angleDeg - 90) * Math.PI) / 180
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
-}
-
-function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number) {
-  const start = polarToCartesian(cx, cy, r, startAngle)
-  const end = polarToCartesian(cx, cy, r, endAngle)
-  const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1'
-  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 1 ${end.x} ${end.y} Z`
-}
-
-export function MoodPieChart({ distribution }: { distribution: { score: number; count: number }[] }) {
+// 凡例に必ず顔アイコン+件数+割合を併記する(secondary encoding)
+export function MoodDistributionBar({ distribution }: { distribution: { score: number; count: number }[] }) {
   const countByScore = new Map(distribution.map((d) => [d.score, d.count]))
   const total = distribution.reduce((s, d) => s + d.count, 0)
 
   if (total === 0) {
-    return <div className="pie-empty">データがありません</div>
+    return <div className="chart-empty">データがありません</div>
   }
 
-  let angle = 0
-  const cx = 60
-  const cy = 60
-  const r = 52
-  const slices = [1, 2, 3, 4, 5].map((score) => {
-    const count = countByScore.get(score) ?? 0
-    const share = count / total
-    const startAngle = angle
-    const endAngle = angle + share * 360
-    angle = endAngle
-    const midAngle = (startAngle + endAngle) / 2
-    const labelPos = polarToCartesian(cx, cy, r * 0.65, midAngle)
-    return { score, count, share, startAngle, endAngle, labelPos }
-  })
+  const segments = [1, 2, 3, 4, 5]
+    .map((score) => ({ score, count: countByScore.get(score) ?? 0 }))
+    .filter((s) => s.count > 0)
+    .map((s) => ({ ...s, share: s.count / total }))
 
   return (
-    <div className="pie-wrap">
-      <svg viewBox="0 0 120 120" className="pie-svg" role="img" aria-label="気分の割合">
-        {slices
-          .filter((s) => s.count > 0)
-          .map((s) => (
-            <path
-              key={s.score}
-              d={describeArc(cx, cy, r, s.startAngle, s.endAngle)}
-              fill={SCORE_COLOR[s.score]}
-              stroke="#fff"
-              strokeWidth={2}
-            >
-              <title>
-                {SCORE_EMOJI[s.score]} {s.count}件({Math.round(s.share * 100)}%)
-              </title>
-            </path>
-          ))}
-        {slices
-          .filter((s) => s.share >= 0.08)
-          .map((s) => (
-            <foreignObject
-              key={`label-${s.score}`}
-              x={s.labelPos.x - 9}
-              y={s.labelPos.y - 9}
-              width={18}
-              height={18}
-            >
-              <MoodFace level={s.score as MoodLevel} size={18} />
-            </foreignObject>
-          ))}
-      </svg>
-      <ul className="pie-legend">
-        {slices
-          .filter((s) => s.count > 0)
-          .map((s) => (
-            <li key={s.score}>
-              <MoodFace level={s.score as MoodLevel} size={20} />
-              {s.count}件
-            </li>
-          ))}
+    <div className="dist-bar-wrap">
+      <div className="dist-bar-track">
+        {segments.map((s) => (
+          <div
+            key={s.score}
+            className="dist-bar-segment"
+            style={{ width: `${s.share * 100}%`, background: SCORE_COLOR[s.score] }}
+            title={`${s.count}件(${Math.round(s.share * 100)}%)`}
+          />
+        ))}
+      </div>
+      <ul className="dist-bar-legend">
+        {segments.map((s) => (
+          <li key={s.score}>
+            <MoodFace level={s.score as MoodLevel} size={20} />
+            <span className="dist-bar-legend-count">{s.count}件</span>
+            <span className="dist-bar-legend-pct">{Math.round(s.share * 100)}%</span>
+          </li>
+        ))}
       </ul>
     </div>
   )
@@ -124,9 +81,9 @@ export function MoodLineChart({
   const hasAnyData = points.some((p) => p.y !== null)
 
   return (
-    <div className="line-wrap">
+    <>
       {!hasAnyData ? (
-        <div className="pie-empty">データがありません</div>
+        <div className="chart-empty">データがありません</div>
       ) : (
         <svg viewBox={`0 0 ${width} ${height}`} className="line-svg" role="img" aria-label="直近7日の気分推移">
           {/* 目盛りの補助線(気分3=ふつうのライン) */}
@@ -156,7 +113,7 @@ export function MoodLineChart({
           ))}
         </svg>
       )}
-    </div>
+    </>
   )
 }
 
