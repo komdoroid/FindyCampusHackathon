@@ -23,6 +23,7 @@ function App() {
   const [userId] = useState(getUserId)
   const [view, setView] = useState<View>('map')
   const [showPostFlow, setShowPostFlow] = useState(shouldShowPostFlow)
+  const [postVersion, setPostVersion] = useState(0)
 
   if (view === 'mypage') {
     return <MyPage userId={userId} onBack={() => setView('map')} />
@@ -32,13 +33,20 @@ function App() {
     <>
       <MapView
         userId={userId}
+        refreshKey={postVersion}
         onPostAgain={() => setShowPostFlow(true)}
         onOpenMyPage={() => setView('mypage')}
       />
 
       {showPostFlow && (
         <Modal size="compact" onClose={() => setShowPostFlow(false)}>
-          <PostFlow userId={userId} onDone={() => setShowPostFlow(false)} />
+          <PostFlow
+            userId={userId}
+            onDone={() => {
+              setShowPostFlow(false)
+              setPostVersion((v) => v + 1)
+            }}
+          />
         </Modal>
       )}
     </>
