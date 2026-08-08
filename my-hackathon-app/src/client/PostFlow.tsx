@@ -18,7 +18,7 @@ export function getLastPostAt(): number | null {
   return raw ? Number(raw) : null
 }
 
-export function PostFlow({ onDone }: { onDone: () => void }) {
+export function PostFlow({ userId, onDone }: { userId: string; onDone: () => void }) {
   const [location, setLocation] = useState<LocationState>({ status: 'locating' })
   const [selectedWardId, setSelectedWardId] = useState<string>('')
   const [score, setScore] = useState<number | null>(null)
@@ -66,6 +66,7 @@ export function PostFlow({ onDone }: { onDone: () => void }) {
           comment: comment || null,
           gender: null,
           ageGroup: null,
+          userId,
         }),
       })
       if (!res.ok) throw new Error('failed')
