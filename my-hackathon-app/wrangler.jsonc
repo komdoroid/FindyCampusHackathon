@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kibun-tenkizu",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-06-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kibun-tenkizu-db",
+      "database_id": "8734e6c6-cb71-4dc8-9eb3-c6979c043bd7"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CounterAgent",
+        "class_name": "CounterAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["CounterAgent"]
+    }
+  ]
+}

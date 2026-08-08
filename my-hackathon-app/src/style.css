@@ -1,0 +1,270 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', Arial, sans-serif;
+  margin: 0;
+  background: #f5f6f8;
+  color: #222;
+}
+
+/* --- 投稿フロー --- */
+.post-flow {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.post-flow h1 {
+  font-size: 1.3rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.hint {
+  text-align: center;
+  color: #666;
+  margin: 16px 0;
+}
+
+.hint.error {
+  color: #c0392b;
+}
+
+.ward-select select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.ward-display {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 16px 0;
+}
+
+.score-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 0 4px;
+}
+
+.score-btn {
+  flex: 1;
+  aspect-ratio: 1;
+  font-size: 1.8rem;
+  border-radius: 12px;
+  border: 2px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.score-btn.selected {
+  border-color: #f5a623;
+  background: #fff3e0;
+  font-weight: bold;
+}
+
+.score-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+}
+
+.post-flow textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: white;
+  background: #f5a623;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- 地図画面 --- */
+html, #root {
+  height: 100%;
+}
+
+.map-view {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+}
+
+/* 区平均バッジ・個別ピンの段階に切り替わったら雲をふわっと消す */
+.leaflet-blobPane-pane {
+  transition: opacity 0.25s ease;
+}
+
+.map-overlay-top {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overall {
+  flex: 1;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.overall-label {
+  display: block;
+  color: #888;
+  font-size: 0.75rem;
+}
+
+.overall-value {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.post-again-btn {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #f5a623;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.alerts {
+  position: absolute;
+  top: 66px;
+  left: 12px;
+  right: 12px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.alert-low {
+  background: rgba(227, 242, 253, 0.95);
+  color: #1565c0;
+}
+
+.alert-high {
+  background: rgba(255, 243, 224, 0.95);
+  color: #e65100;
+}
+
+/* 個別投稿の気分ピン: 逆しずく型(円の上部に顔)。拡大した時だけ表示 */
+.mood-pin {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pins-visible .mood-pin {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.mood-pin-shape {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  background: #fff;
+  border: 3px solid #999;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood-pin-face {
+  transform: rotate(45deg);
+  font-size: 20px;
+  line-height: 1;
+}
+
+/* 個別ピンの上に常時表示するコメント吹き出し */
+/* Leafletのtooltipは既定でwhite-space:nowrap/横幅自動なので、
+   縦積み表示にならないよう外側のコンテナ自体に横書きを強制する */
+.mood-popup.leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: none;
+  border-radius: 12px;
+  padding: 5px 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  opacity: 1;
+  writing-mode: horizontal-tb !important;
+  white-space: normal !important;
+  max-width: 150px;
+  width: max-content;
+}
+
+.mood-popup.leaflet-tooltip-top::before {
+  border-top-color: rgba(255, 255, 255, 0.97);
+}
+
+.mood-bubble {
+  font-size: 0.72rem;
+  color: #333;
+  max-width: 140px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.3;
+}
