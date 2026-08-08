@@ -2,6 +2,10 @@
 
 [Findy Campus Hackathon #2](https://www.craftstadium.com/hackathon/findy-campus-hackathon-202608)（2026/8/8開催）の参加者向けスターターです。アプリの雛形と、コーディングエージェント用のスキルが最初から全部入っています。
 
+## 発表用スライド
+
+https://canva.link/7ifuzc992ux6rdr
+
 ## 始め方
 
 ```sh
