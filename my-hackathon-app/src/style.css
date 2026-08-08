@@ -479,6 +479,24 @@ html, #root {
 
 .map-header-post {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 区の平均(東京全体の気分カード)と混同されないよう、これが自分の最新投稿であることを明示するタグ */
+.map-header-post-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--duo-blue);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.map-header-post-row {
+  display: flex;
   align-items: center;
   gap: 10px;
 }
@@ -953,7 +971,7 @@ html, #root {
   margin-bottom: 14px;
 }
 
-.profile-recent {
+.profile-recent-row {
   display: flex;
   align-items: center;
   gap: 16px;

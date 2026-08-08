@@ -40,14 +40,18 @@ function formatDate(iso: string): string {
   })
 }
 
-function formatDateOnly(iso: string): string {
-  const d = new Date(`${iso.replace(' ', 'T')}Z`)
-  return d.toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+function parseSqliteUtc(iso: string): number {
+  return new Date(`${iso.replace(' ', 'T')}Z`).getTime()
 }
 
-function daysSince(iso: string): number {
-  const d = new Date(`${iso.replace(' ', 'T')}Z`)
-  return Math.max(1, Math.floor((Date.now() - d.getTime()) / 86_400_000) + 1)
+function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
+  return (
+    <div className="stat-tile">
+      <span className="stat-tile-label">{label}</span>
+      <span className="stat-tile-value">{value}</span>
+      {sub && <span className="stat-tile-sub">{sub}</span>}
+    </div>
+  )
 }
 
 type Tab = 'profile' | 'calendar' | 'history'
@@ -154,6 +158,17 @@ function ProfileTab({ userId }: { userId: string }) {
   const latest = data.latest
   const weather = latest ? scoreToWeather(latest.score) : null
 
+  const trendTotal = data.dailyTrend.reduce((s, d) => s + d.count, 0)
+  const trendAvg =
+    trendTotal > 0 ? (data.dailyTrend.reduce((s, d) => s + d.average * d.count, 0) / trendTotal).toFixed(1) : null
+
+  const modeEntry =
+    data.distribution.length > 0 ? data.distribution.reduce((a, b) => (b.count > a.count ? b : a)) : null
+
+  const daysSinceFirst = data.firstPostDate
+    ? Math.max(1, Math.floor((Date.now() - parseSqliteUtc(data.firstPostDate)) / 86_400_000) + 1)
+    : null
+
   function shareText() {
     if (!latest) return ''
     return `今日の気分は ${SCORE_EMOJI[latest.score]} でした #気分の天気図`
@@ -192,29 +207,24 @@ function ProfileTab({ userId }: { userId: string }) {
   return (
     <div className="profile-card">
       <div className="stat-row">
-        <div className="stat-tile">
-          <span className="stat-tile-label">累計投稿数</span>
-          <span className="stat-tile-value">{data.totalPosts}件</span>
-        </div>
-        {data.firstPostDate && (
-          <div className="stat-tile">
-            <span className="stat-tile-label">記録開始日</span>
-            <span className="stat-tile-value">{formatDateOnly(data.firstPostDate)}</span>
-            <span className="stat-tile-sub">{daysSince(data.firstPostDate)}日目</span>
-          </div>
+        <StatTile label="累計投稿数" value={`${data.totalPosts}件`} />
+        {trendAvg && <StatTile label="直近7日の平均気分" value={`${trendAvg} / 5`} />}
+        {modeEntry && (
+          <StatTile label="もっとも多い気分" value={SCORE_EMOJI[modeEntry.score]} sub={`${modeEntry.count}件`} />
         )}
+        {daysSinceFirst && <StatTile label="記録を始めてから" value={`${daysSinceFirst}日`} />}
       </div>
 
-      <div className="profile-section">
-        <span className="profile-section-title">直近の記録</span>
+      <div className="profile-section profile-recent">
+        <span className="profile-section-title">今の気分(あなたの最新の投稿)</span>
         {latest ? (
-          <div className="profile-recent">
+          <div className="profile-recent-row">
             <span className="profile-recent-mood">
-              <MoodFace level={latest.score as MoodLevel} size={40} />
+              <MoodFace level={latest.score as MoodLevel} size={44} />
             </span>
             <div className="profile-recent-body">
               <span className="profile-recent-ward">{WARD_MAP[latest.ward]?.name ?? latest.ward}</span>
-              {weather && <span className="profile-recent-weather">{WEATHER_LABEL[weather]}</span>}
+              <span className="profile-recent-weather">{weather ? WEATHER_LABEL[weather] : ''}の気分</span>
               {latest.comment && <p className="profile-recent-comment">「{latest.comment}」</p>}
               <span className="profile-recent-date">{formatDate(latest.createdAt)}</span>
             </div>
@@ -225,13 +235,13 @@ function ProfileTab({ userId }: { userId: string }) {
       </div>
 
       <div className="profile-section">
-        <span className="profile-section-title">気分の割合</span>
-        <MoodDistributionBar distribution={data.distribution} />
+        <span className="profile-section-title">直近7日の推移</span>
+        <MoodLineChart dailyTrend={data.dailyTrend} />
       </div>
 
       <div className="profile-section">
-        <span className="profile-section-title">直近7日の推移</span>
-        <MoodLineChart dailyTrend={data.dailyTrend} />
+        <span className="profile-section-title">気分の割合</span>
+        <MoodDistributionBar distribution={data.distribution} />
       </div>
 
       <div className="profile-share-row">

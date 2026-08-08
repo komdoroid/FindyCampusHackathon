@@ -459,15 +459,18 @@ export function MapView({
         {insight?.latestPost && (
           <>
             <div className="map-header-post">
-              <MoodFace level={insight.latestPost.score as MoodLevel} size={40} />
-              <div className="map-header-post-text">
-                <span className="map-header-post-ward">
-                  {WARD_MAP[insight.latestPost.ward]?.name ?? insight.latestPost.ward}
-                  <span className="map-header-post-time">{formatDateTime(insight.latestPost.createdAt)}</span>
-                </span>
-                {insight.latestPost.comment && (
-                  <span className="map-header-post-comment">「{insight.latestPost.comment}」</span>
-                )}
+              <span className="map-header-post-tag">今の気分(あなたの最新の投稿)</span>
+              <div className="map-header-post-row">
+                <MoodFace level={insight.latestPost.score as MoodLevel} size={40} />
+                <div className="map-header-post-text">
+                  <span className="map-header-post-ward">
+                    {WARD_MAP[insight.latestPost.ward]?.name ?? insight.latestPost.ward}
+                    <span className="map-header-post-time">{formatDateTime(insight.latestPost.createdAt)}</span>
+                  </span>
+                  {insight.latestPost.comment && (
+                    <span className="map-header-post-comment">「{insight.latestPost.comment}」</span>
+                  )}
+                </div>
               </div>
             </div>
             {insight.comment && (
