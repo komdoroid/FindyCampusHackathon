@@ -80,9 +80,7 @@ export function findNearestWard(lat: number, lng: number): { ward: WardDef | nul
   return { ward: nearest, distanceKm: minDist }
 }
 
-// アラート・集計の閾値。当日データを見て調整するためここに集約する
-export const ALERT_LOW = 2.5
-export const ALERT_HIGH = 3.5
+// 集計の閾値。当日データを見て調整するためここに集約する
 export const MIN_COUNT = 3
 export const WINDOW_HOURS = 6
 

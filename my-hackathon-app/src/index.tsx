@@ -2,15 +2,7 @@ import { Hono } from 'hono'
 import { agentsMiddleware } from 'hono-agents'
 import { renderToReadableStream } from 'react-dom/server'
 import { Script, Link, ViteClient, ReactRefresh } from 'vite-ssr-components/react'
-import {
-  WARDS,
-  isValidWardId,
-  scoreToWeather,
-  ALERT_LOW,
-  ALERT_HIGH,
-  MIN_COUNT,
-  WINDOW_HOURS,
-} from './shared/wards'
+import { WARDS, isValidWardId, scoreToWeather, MIN_COUNT, WINDOW_HOURS } from './shared/wards'
 export { CounterAgent } from './agents/counter'
 
 const app = new Hono<{ Bindings: CloudflareBindings }>()
@@ -76,19 +68,7 @@ app.get('/api/summary', async (c) => {
   const overallSum = results.reduce((sum, r) => sum + r.average * r.count, 0)
   const overall = total > 0 ? Number((overallSum / total).toFixed(1)) : null
 
-  const alerts = wards
-    .filter((w) => w.enough && w.average !== null)
-    .flatMap((w) => {
-      if (w.average! < ALERT_LOW) {
-        return [{ ward: w.ward, type: 'low' as const, message: `${w.name}、雨模様です。何かありましたか？` }]
-      }
-      if (w.average! > ALERT_HIGH) {
-        return [{ ward: w.ward, type: 'high' as const, message: `${w.name}、よく晴れています。何かいいことが？` }]
-      }
-      return []
-    })
-
-  return c.json({ wards, total, overall, alerts })
+  return c.json({ wards, total, overall })
 })
 
 app.get('/api/moods/recent', async (c) => {

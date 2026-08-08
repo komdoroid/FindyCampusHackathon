@@ -262,29 +262,6 @@ html, #root {
   line-height: 1.4;
 }
 
-.alerts {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.alert {
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.alert-low {
-  background: rgba(227, 242, 253, 0.95);
-  color: #1565c0;
-}
-
-.alert-high {
-  background: rgba(255, 243, 224, 0.95);
-  color: #e65100;
-}
-
 /* 個別投稿の気分ピン: 逆しずく型(円の上部に顔)。拡大した時だけ表示 */
 .mood-pin {
   pointer-events: none;
@@ -675,17 +652,52 @@ html, #root {
   }
 }
 
-.profile-share-btn {
-  display: block;
-  width: 100%;
+.profile-share-row {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
   margin-top: 20px;
-  padding: 12px;
-  border-radius: 10px;
+}
+
+.profile-share-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
   border: none;
-  background: #1da1f2;
   color: white;
-  font-weight: bold;
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.profile-share-icon:hover {
+  transform: scale(1.08);
+}
+
+.profile-share-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.profile-share-icon.instagram {
+  background: radial-gradient(circle at 30% 110%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+}
+
+.profile-share-icon.threads {
+  background: #000;
+}
+
+.profile-share-icon.x {
+  background: #000;
+}
+
+.profile-share-notice {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 13px;
+  color: #666;
 }
 
 /* --- 円グラフ --- */

@@ -14,6 +14,42 @@ const LOW_ALERT_WARD = 'shibuya'
 const HIGH_ALERT_WARD = 'setagaya'
 const INSUFFICIENT_WARDS = ['katsushika']
 
+// 通常区を雨/くもり時々雨/くもり/晴れの4カテゴリにはっきり分けて、
+// 地図の色分けが一目で区別できるようにする(元は全区がくもり寄りの一律パターンで、色の違いがほぼ見えなかった)
+const WARD_BAND = {
+  // 雨 (平均 <= 2.0)
+  nerima: 'rain',
+  suginami: 'rain',
+  shinagawa: 'rain',
+  // くもり時々雨 (2.0 < 平均 <= 2.8)
+  adachi: 'rain_cloud',
+  bunkyo: 'rain_cloud',
+  edogawa: 'rain_cloud',
+  koto: 'rain_cloud',
+  minato: 'rain_cloud',
+  // くもり (2.8 < 平均 <= 3.5)
+  kita: 'cloud',
+  toshima: 'cloud',
+  nakano: 'cloud',
+  taito: 'cloud',
+  chuo: 'cloud',
+  meguro: 'cloud',
+  // 晴れ (平均 > 3.5)
+  itabashi: 'sunny',
+  arakawa: 'sunny',
+  shinjuku: 'sunny',
+  sumida: 'sunny',
+  chiyoda: 'sunny',
+  ota: 'sunny',
+}
+
+const BAND_SCORE_POOL = {
+  rain: [1, 1, 2, 2, 2, 1, 2],
+  rain_cloud: [2, 2, 3, 3, 2, 3, 2],
+  cloud: [3, 3, 3, 4, 3, 4, 3],
+  sunny: [4, 4, 5, 4, 5, 4, 4],
+}
+
 // 通常投稿で使う(空コメントを多めに混ぜる)
 const COMMENTS = [
   '', '', '', '', '',
@@ -115,9 +151,8 @@ for (const ward of WARD_IDS) {
       rows.push({ ward, score: randInt(1, 5), comment: pick(REAL_COMMENTS), createdAt: recentTimestamp() })
     }
   } else {
-    // 通常区: くもり寄りの平常運転。極端な値を避けて閾値超えの偶発を抑えつつ、
-    // 分布の理論平均をわざと3.0からずらして(≈3.17)、全体平均がちょうど3.0に張り付かないようにする
-    addWardWindowPosts(ward, [2, 3, 3, 3, 4, 4])
+    // 通常区: WARD_BANDで割り当てた天気カテゴリに応じたスコア分布を使う
+    addWardWindowPosts(ward, BAND_SCORE_POOL[WARD_BAND[ward]])
   }
 }
 

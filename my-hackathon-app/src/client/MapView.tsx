@@ -28,17 +28,10 @@ interface WardSummary {
   weather: Weather | null
 }
 
-interface Alert {
-  ward: string
-  type: 'low' | 'high'
-  message: string
-}
-
 interface Summary {
   wards: WardSummary[]
   total: number
   overall: number | null
-  alerts: Alert[]
 }
 
 interface Post {
@@ -390,16 +383,6 @@ export function MapView({
             </button>
             <span className="ai-insight-tag">AIによるあなたの気分分析</span>
             <p className="ai-insight-comment">{insight.comment}</p>
-          </div>
-        )}
-
-        {summary && summary.alerts.length > 0 && (
-          <div className="alerts">
-            {summary.alerts.map((a) => (
-              <div key={a.ward} className={`alert alert-${a.type}`}>
-                {a.message}
-              </div>
-            ))}
           </div>
         )}
       </div>
