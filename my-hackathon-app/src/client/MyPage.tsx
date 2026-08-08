@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { WARD_MAP, SCORE_EMOJI, WEATHER_LABEL, scoreToWeather } from '../shared/wards'
 import { MoodDistributionBar, MoodLineChart, CommitCalendar } from './charts'
 import { MoodFace, type MoodLevel } from './MoodFace'
@@ -44,7 +44,7 @@ function parseSqliteUtc(iso: string): number {
   return new Date(`${iso.replace(' ', 'T')}Z`).getTime()
 }
 
-function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function StatTile({ label, value, sub }: { label: string; value: ReactNode; sub?: string }) {
   return (
     <div className="stat-tile">
       <span className="stat-tile-label">{label}</span>
@@ -210,7 +210,11 @@ function ProfileTab({ userId }: { userId: string }) {
         <StatTile label="累計投稿数" value={`${data.totalPosts}件`} />
         {trendAvg && <StatTile label="直近7日の平均気分" value={`${trendAvg} / 5`} />}
         {modeEntry && (
-          <StatTile label="もっとも多い気分" value={SCORE_EMOJI[modeEntry.score]} sub={`${modeEntry.count}件`} />
+          <StatTile
+            label="もっとも多い気分"
+            value={<MoodFace level={modeEntry.score as MoodLevel} size={28} />}
+            sub={`${modeEntry.count}件`}
+          />
         )}
         {daysSinceFirst && <StatTile label="記録を始めてから" value={`${daysSinceFirst}日`} />}
       </div>
