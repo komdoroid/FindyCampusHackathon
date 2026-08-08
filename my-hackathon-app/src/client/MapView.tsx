@@ -101,10 +101,12 @@ function escapeHtml(s: string): string {
 
 export function MapView({
   userId,
+  refreshKey,
   onPostAgain,
   onOpenMyPage,
 }: {
   userId: string
+  refreshKey: number
   onPostAgain: () => void
   onOpenMyPage: () => void
 }) {
@@ -314,7 +316,9 @@ export function MapView({
       clearInterval(id)
       clearInterval(insightId)
     }
-  }, [userId])
+    // refreshKeyは投稿完了時にインクリメントされる。投稿直後にsummary/posts/insightを
+    // 即座に再取得するためのトリガーとしてのみ使う
+  }, [userId, refreshKey])
 
   // 集計結果が更新されたらブロブの色とラベルを更新
   useEffect(() => {

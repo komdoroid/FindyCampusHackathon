@@ -217,6 +217,12 @@ function weatherCodeToLabel(code: number): { label: string; emoji: string } {
   return { label: 'くもり', emoji: '☁️' }
 }
 
+// SQLiteのdatetime('now')は "YYYY-MM-DD HH:MM:SS" 形式のUTCだが、タイムゾーン表記がないため
+// そのままDateに渡すと環境によってローカル時刻と誤解されうる。明示的にUTCとして解釈させる。
+function parseSqliteUtc(value: string): number {
+  return new Date(`${value.replace(' ', 'T')}Z`).getTime()
+}
+
 const SCORE_MEANING: Record<number, string> = {
   1: 'とても悪い',
   2: 'やや悪い',
@@ -389,10 +395,26 @@ app.get('/api/insight', async (c) => {
     return c.json({ ok: false, error: 'userId required' }, 400)
   }
 
-  const cached = await c.env.DB.prepare('SELECT * FROM user_insights WHERE user_id = ?')
-    .bind(userId)
-    .first<UserInsightRow>()
-  const isStale = !cached || Date.now() - new Date(cached.generated_at).getTime() > INSIGHT_TTL_MS
+  const [cached, latestPost] = await Promise.all([
+    c.env.DB.prepare('SELECT * FROM user_insights WHERE user_id = ?')
+      .bind(userId)
+      .first<UserInsightRow>(),
+    c.env.DB.prepare(
+      'SELECT created_at as createdAt FROM moods WHERE user_id = ? ORDER BY created_at DESC LIMIT 1'
+    )
+      .bind(userId)
+      .first<{ createdAt: string }>(),
+  ])
+
+  // キャッシュ生成後に新しい投稿があれば、TTL内でも必ず再生成する
+  // (時間経過だけで判定すると、直近の投稿が反映されないまま古いコメントを返し続けてしまう)
+  const hasNewerPost =
+    Boolean(cached) &&
+    Boolean(latestPost) &&
+    parseSqliteUtc(latestPost!.createdAt) > new Date(cached!.generated_at).getTime()
+
+  const isStale =
+    !cached || hasNewerPost || Date.now() - new Date(cached.generated_at).getTime() > INSIGHT_TTL_MS
 
   const row = isStale ? await generateUserInsight(c.env, userId) : cached
 
