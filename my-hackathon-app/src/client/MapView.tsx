@@ -10,11 +10,13 @@ import {
   SCORE_EMOJI,
   SCORE_COLOR,
   scoreToWeather,
+  findNearestWard,
   TOKYO23_BOUNDS,
   PIN_ZOOM_THRESHOLD,
   isPointInPolygon,
   polygonBounds,
   type Weather,
+  type WardDef,
 } from '../shared/wards'
 import { WARD_POLYGONS } from '../shared/wardPolygons'
 
@@ -45,7 +47,15 @@ interface Post {
   ward: string
   score: number
   comment: string | null
+  userId: string | null
   createdAt: string
+}
+
+interface Insight {
+  weather: { label: string; emoji: string; temp: number | null } | null
+  postCount: number
+  comment: string
+  generatedAt: string
 }
 
 const REFRESH_MS = 30_000
@@ -112,9 +122,20 @@ function escapeHtml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-export function MapView({ onPostAgain }: { onPostAgain: () => void }) {
+export function MapView({
+  userId,
+  onPostAgain,
+  onOpenMyPage,
+}: {
+  userId: string
+  onPostAgain: () => void
+  onOpenMyPage: () => void
+}) {
   const [summary, setSummary] = useState<Summary | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
+  const [insight, setInsight] = useState<Insight | null>(null)
+  const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
+  const [insightDismissed, setInsightDismissed] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const blobLayersRef = useRef<Map<string, L.Polygon>>(new Map())
@@ -247,12 +268,14 @@ export function MapView({ onPostAgain }: { onPostAgain: () => void }) {
         if (!ward) continue
         const [lat, lng] = jitterPositionInWard(post.ward, post.id)
         if (!visibleBounds.contains([lat, lng])) continue
+        const mine = post.userId !== null && post.userId === userId
         const marker = L.marker([lat, lng], {
           pane: 'pinPane',
           icon: L.divIcon({
-            className: 'mood-pin',
+            className: mine ? 'mood-pin mood-pin-mine' : 'mood-pin',
             html: `<div class="mood-pin-shape" style="border-color:${SCORE_COLOR[post.score]}">
               <span class="mood-pin-face">${SCORE_EMOJI[post.score]}</span>
+              ${mine ? '<span class="mood-pin-mine-badge">★</span>' : ''}
             </div>`,
             // 涙型の先端は見た目上ボックス上端から40pxの位置にあるため、
             // アンカーもそこに合わせて実際の座標とズレないようにする
@@ -306,6 +329,21 @@ export function MapView({ onPostAgain }: { onPostAgain: () => void }) {
     }
   }, [])
 
+  // 現在地の区を判定して左上に表示する(位置情報が使えない/拒否時は何も表示しない)
+  useEffect(() => {
+    if (!('geolocation' in navigator)) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { ward } = findNearestWard(pos.coords.latitude, pos.coords.longitude)
+        setCurrentWard(ward)
+      },
+      () => {
+        // 取得できない場合は何も表示しない
+      },
+      { timeout: 8000 }
+    )
+  }, [])
+
   // データ取得・自動更新
   useEffect(() => {
     let cancelled = false
@@ -325,13 +363,26 @@ export function MapView({ onPostAgain }: { onPostAgain: () => void }) {
         // 次回の自動更新に任せる
       }
     }
+    async function loadInsight() {
+      try {
+        const res = await fetch(`/api/insight?userId=${encodeURIComponent(userId)}`)
+        const data = (await res.json()) as Insight
+        if (!cancelled) setInsight(data)
+      } catch {
+        // 次回の自動更新に任せる
+      }
+    }
     load()
+    loadInsight()
     const id = setInterval(load, REFRESH_MS)
+    // サーバー側で数分単位のキャッシュをしているため、こちらは低頻度のポーリングでよい
+    const insightId = setInterval(loadInsight, REFRESH_MS * 10)
     return () => {
       cancelled = true
       clearInterval(id)
+      clearInterval(insightId)
     }
-  }, [])
+  }, [userId])
 
   // 集計結果が更新されたらブロブの色とラベルを更新
   useEffect(() => {
@@ -374,31 +425,65 @@ export function MapView({ onPostAgain }: { onPostAgain: () => void }) {
     renderPinsRef.current()
   }, [posts])
 
+  // AI分析の内容が新しくなったら、閉じていても再度表示する
+  useEffect(() => {
+    setInsightDismissed(false)
+  }, [insight?.generatedAt])
+
   return (
     <div className="map-view">
       <div className="map-overlay-top">
-        <div className="overall">
-          <span className="overall-label">東京全体</span>
-          <span className="overall-value">
-            {summary?.overall !== null && summary?.overall !== undefined
-              ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
-              : '集計中…'}
-          </span>
+        <div className="overlay-row">
+          <div className="overall">
+            {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
+            <span className="overall-label">東京全体の気分</span>
+            <span className="overall-value">
+              {summary?.overall !== null && summary?.overall !== undefined
+                ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
+                : '集計中…'}
+            </span>
+            {insight?.weather && (
+              <span className="overall-real-weather">
+                天気: {insight.weather.emoji} {insight.weather.label}
+                {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
+              </span>
+            )}
+          </div>
+          <div className="header-buttons">
+            <button type="button" className="mypage-btn" onClick={onOpenMyPage}>
+              マイページ
+            </button>
+            <button type="button" className="post-again-btn" onClick={onPostAgain}>
+              気分を投稿する
+            </button>
+          </div>
         </div>
-        <button type="button" className="post-again-btn" onClick={onPostAgain}>
-          気分を投稿する
-        </button>
-      </div>
 
-      {summary && summary.alerts.length > 0 && (
-        <div className="alerts">
-          {summary.alerts.map((a) => (
-            <div key={a.ward} className={`alert alert-${a.type}`}>
-              {a.message}
-            </div>
-          ))}
-        </div>
-      )}
+        {insight?.comment && !insightDismissed && (
+          <div className="ai-insight">
+            <button
+              type="button"
+              className="ai-insight-close"
+              onClick={() => setInsightDismissed(true)}
+              aria-label="閉じる"
+            >
+              ×
+            </button>
+            <span className="ai-insight-tag">AIによるあなたの気分分析</span>
+            <p className="ai-insight-comment">{insight.comment}</p>
+          </div>
+        )}
+
+        {summary && summary.alerts.length > 0 && (
+          <div className="alerts">
+            {summary.alerts.map((a) => (
+              <div key={a.ward} className={`alert alert-${a.type}`}>
+                {a.message}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div ref={mapContainerRef} className="leaflet-container" />
     </div>

@@ -115,8 +115,9 @@ for (const ward of WARD_IDS) {
       rows.push({ ward, score: randInt(1, 5), comment: pick(REAL_COMMENTS), createdAt: recentTimestamp() })
     }
   } else {
-    // 通常区: くもり寄りの平常運転。極端な値を避けて閾値超えの偶発を抑える
-    addWardWindowPosts(ward, [2, 3, 3, 3, 3, 3, 4])
+    // 通常区: くもり寄りの平常運転。極端な値を避けて閾値超えの偶発を抑えつつ、
+    // 分布の理論平均をわざと3.0からずらして(≈3.17)、全体平均がちょうど3.0に張り付かないようにする
+    addWardWindowPosts(ward, [2, 3, 3, 3, 4, 4])
   }
 }
 
