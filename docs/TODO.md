@@ -51,3 +51,10 @@
   - `src/style.css`: `.map-view`をflex-columnにし、地図とオーバーレイを`.map-canvas`(flex:1)にまとめることで、ヘッダー分の高さが地図の描画範囲を圧迫しないよう修正
   - Playwright(chromium)でローカルdevサーバーを実際にブラウザ表示して動作確認済み（テスト投稿を作成し、ヘッダーに氏名・コメント・AI分析が正しく表示されることをスクリーンショットで確認、コンソールエラーなし。確認後テストデータは削除）
   - GitHubにpush済み (`2bf0e74`)、本番デプロイ済み (Version ID: 3ff89a90-c501-429e-8c1d-a0ca996e8c49)
+
+- [x] マップヘッダーのハンバーガーメニューを廃止し、ページ遷移ボタンを直接配置 (2026-08-08)
+  - ページが「地図」「マイページ」の2つしかないため、開閉式サイドメニュー(ハンバーガーボタン+スライドメニュー)を削除
+  - `src/client/MapView.tsx`: `menuOpen`state・`.side-menu`nav・`.menu-toggle-btn`を削除し、「気分を投稿する」「マイページ」ボタンを`.map-header`内に常時表示
+  - `src/style.css`: 未使用になった`.menu-toggle-btn*` / `.side-menu*` / `.overlay-row`を削除し、`.map-header-nav*`を追加
+  - Playwrightでマイページボタンの遷移まで動作確認済み（コンソールエラーなし）
+  - GitHubにpush済み (`883322a`)、本番デプロイ済み (Version ID: 1801253f-b2b5-4968-9a5e-157b72760b6c)
