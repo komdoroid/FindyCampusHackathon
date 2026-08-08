@@ -6,8 +6,6 @@ import {
   WARD_MAP,
   WEATHER_LABEL,
   WEATHER_COLOR,
-  WEATHER_EMOJI,
-  SCORE_EMOJI,
   SCORE_COLOR,
   scoreToWeather,
   findNearestWard,
@@ -19,6 +17,7 @@ import {
   type WardDef,
 } from '../shared/wards'
 import { WARD_POLYGONS } from '../shared/wardPolygons'
+import { moodFaceMarkup, weatherToMoodLevel } from './MoodFace'
 
 interface WardSummary {
   ward: string
@@ -136,6 +135,7 @@ export function MapView({
   const [insight, setInsight] = useState<Insight | null>(null)
   const [currentWard, setCurrentWard] = useState<WardDef | null>(null)
   const [insightDismissed, setInsightDismissed] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const blobLayersRef = useRef<Map<string, L.Polygon>>(new Map())
@@ -274,7 +274,7 @@ export function MapView({
           icon: L.divIcon({
             className: mine ? 'mood-pin mood-pin-mine' : 'mood-pin',
             html: `<div class="mood-pin-shape" style="border-color:${SCORE_COLOR[post.score]}">
-              <span class="mood-pin-face">${SCORE_EMOJI[post.score]}</span>
+              <span class="mood-pin-face">${moodFaceMarkup(post.score as 1 | 2 | 3 | 4 | 5, 26)}</span>
               ${mine ? '<span class="mood-pin-mine-badge">★</span>' : ''}
             </div>`,
             // 涙型の先端は見た目上ボックス上端から40pxの位置にあるため、
@@ -409,7 +409,7 @@ export function MapView({
           interactive: false,
           icon: L.divIcon({
             className: 'ward-emoji-badge',
-            html: `<div class="ward-emoji-badge-inner">${WEATHER_EMOJI[stat!.weather!]}</div>`,
+            html: `<div class="ward-emoji-badge-inner">${moodFaceMarkup(weatherToMoodLevel(stat!.weather!), 26)}</div>`,
             iconSize: [36, 36],
             iconAnchor: [18, 18],
           }),
@@ -434,29 +434,32 @@ export function MapView({
     <div className="map-view">
       <div className="map-overlay-top">
         <div className="overlay-row">
-          <div className="overall">
-            {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
-            <span className="overall-label">東京全体の気分</span>
-            <span className="overall-value">
-              {summary?.overall !== null && summary?.overall !== undefined
-                ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
-                : '集計中…'}
+          <button
+            type="button"
+            className="menu-toggle-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="メニューを開く"
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        </div>
+
+        <div className="overall">
+          {currentWard && <span className="current-ward">📍 {currentWard.name}</span>}
+          <span className="overall-label">東京全体の気分</span>
+          <span className="overall-value">
+            {summary?.overall !== null && summary?.overall !== undefined
+              ? `${summary.overall.toFixed(1)} ${WEATHER_LABEL[scoreToWeather(summary.overall)]}`
+              : '集計中…'}
+          </span>
+          {insight?.weather && (
+            <span className="overall-real-weather">
+              天気: {insight.weather.emoji} {insight.weather.label}
+              {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
             </span>
-            {insight?.weather && (
-              <span className="overall-real-weather">
-                天気: {insight.weather.emoji} {insight.weather.label}
-                {insight.weather.temp !== null ? ` ${insight.weather.temp.toFixed(0)}℃` : ''}
-              </span>
-            )}
-          </div>
-          <div className="header-buttons">
-            <button type="button" className="mypage-btn" onClick={onOpenMyPage}>
-              マイページ
-            </button>
-            <button type="button" className="post-again-btn" onClick={onPostAgain}>
-              気分を投稿する
-            </button>
-          </div>
+          )}
         </div>
 
         {insight?.comment && !insightDismissed && (
@@ -486,6 +489,38 @@ export function MapView({
       </div>
 
       <div ref={mapContainerRef} className="leaflet-container" />
+
+      {menuOpen && <div className="side-menu-backdrop" onClick={() => setMenuOpen(false)} />}
+      <nav className={menuOpen ? 'side-menu side-menu-open' : 'side-menu'} aria-hidden={!menuOpen}>
+        <button
+          type="button"
+          className="side-menu-close"
+          onClick={() => setMenuOpen(false)}
+          aria-label="メニューを閉じる"
+        >
+          ×
+        </button>
+        <button
+          type="button"
+          className="side-menu-item side-menu-item-primary"
+          onClick={() => {
+            setMenuOpen(false)
+            onPostAgain()
+          }}
+        >
+          気分を投稿する
+        </button>
+        <button
+          type="button"
+          className="side-menu-item"
+          onClick={() => {
+            setMenuOpen(false)
+            onOpenMyPage()
+          }}
+        >
+          マイページ
+        </button>
+      </nav>
     </div>
   )
 }

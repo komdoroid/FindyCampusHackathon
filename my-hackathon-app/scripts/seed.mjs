@@ -79,8 +79,9 @@ function recentTimestamp() {
   return toSqlDatetime(d)
 }
 
-const WARD_POST_TARGET = 50
-const GUARANTEED_COMMENTS = 5
+// 区あたりの件数が多すぎると地図のピンや一覧取得が重くなるため控えめにする
+const WARD_POST_TARGET = 12
+const GUARANTEED_COMMENTS = 3
 
 function addWardWindowPosts(ward, scorePool) {
   const usedComments = new Set()

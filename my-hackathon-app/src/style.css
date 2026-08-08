@@ -1,10 +1,10 @@
 :root {
-  --duo-green: #58cc02;
-  --duo-green-dark: #58a700;
-  --duo-green-bg: #d7ffb8;
-  --duo-blue: #1cb0f6;
-  --duo-blue-dark: #1899d6;
-  --duo-blue-bg: #ddf4ff;
+  --duo-green: #14cf93;
+  --duo-green-dark: #0da875;
+  --duo-green-bg: #d3fbea;
+  --duo-blue: #4d6bff;
+  --duo-blue-dark: #3550da;
+  --duo-blue-bg: #e3e8ff;
   --duo-red: #ff4b4b;
   --duo-red-dark: #ea2b2b;
   --duo-yellow: #ffc800;
@@ -20,6 +20,38 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* 絵文字の代わりに使う、丸くデフォルメしたキャラクターの顔。
+   表示されるたびに(初回描画・地図のピン再生成のたび)ポップに弾んで登場する */
+@keyframes mood-face-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.mood-face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  flex-shrink: 0;
+  animation: mood-face-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mood-face svg {
+  display: block;
 }
 
 html, body {
@@ -108,7 +140,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.9rem;
   border-radius: 18px;
   border: 2px solid var(--duo-gray);
   border-bottom: 4px solid var(--duo-gray);
@@ -187,7 +218,7 @@ body {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #61d602;
+  background: #22e6a5;
 }
 
 .submit-btn:active:not(:disabled) {
@@ -244,7 +275,6 @@ html, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
   background: rgba(255, 255, 255, 0.92);
   border: 2px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
@@ -270,17 +300,18 @@ html, #root {
 .overlay-row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
 }
 
+/* 通知(アラート)と同じ並びの吹き出しとして、縦長のカードで表示する */
 .overall {
-  flex: 1;
-  padding: 12px 18px;
+  align-self: flex-start;
+  width: min(76%, 260px);
+  padding: 10px 16px;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(4px);
   border: 2px solid var(--duo-gray);
-  border-radius: 16px;
+  border-radius: 4px 16px 16px 16px;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
@@ -316,64 +347,129 @@ html, #root {
   color: #666;
 }
 
-.header-buttons {
+/* ハンバーガーメニューボタン(左メニューの開閉トリガー) */
+.menu-toggle-btn {
   flex-shrink: 0;
+  width: 46px;
+  height: 46px;
   display: flex;
-  gap: 8px;
-}
-
-.post-again-btn {
-  flex-shrink: 0;
-  padding: 12px 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border-radius: 14px;
-  border: none;
-  border-bottom: 4px solid var(--duo-blue-dark);
-  background: var(--duo-blue);
-  color: white;
-  font-weight: 800;
+  border: 2px solid var(--duo-gray);
+  border-bottom: 4px solid var(--duo-gray);
+  background: rgba(255, 255, 255, 0.96);
   cursor: pointer;
-  white-space: nowrap;
   transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
 }
 
-.post-again-btn:hover {
-  background: #3dc0fb;
+.menu-toggle-btn:hover {
+  background: #fafafa;
 }
 
-.post-again-btn:active {
+.menu-toggle-btn:active {
   transform: translateY(3px);
-  border-bottom-width: 1px;
+  border-bottom-width: 2px;
 }
 
-.mypage-btn {
-  flex-shrink: 0;
-  padding: 12px 18px;
+.menu-toggle-btn span {
+  display: block;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--duo-text-dark);
+}
+
+/* 左からスライドして出てくるメニュー(マイページ・気分を投稿する) */
+.side-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1900;
+}
+
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2000;
+  width: min(78%, 300px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 24px 16px;
+  background: #fff;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.side-menu-open {
+  transform: translateX(0);
+}
+
+.side-menu-close {
+  align-self: flex-end;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  border: none;
+  background: var(--duo-gray);
+  color: var(--duo-text-dark);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.side-menu-item {
+  padding: 14px 18px;
   border-radius: 14px;
   border: 2px solid var(--duo-gray);
   border-bottom: 4px solid var(--duo-gray);
   background: white;
   color: var(--duo-text-dark);
   font-weight: 800;
+  font-size: 1rem;
+  text-align: left;
   cursor: pointer;
-  white-space: nowrap;
   transition: transform 0.08s ease, border-bottom-width 0.08s ease, background 0.15s ease;
 }
 
-.mypage-btn:hover {
+.side-menu-item:hover {
   background: #fafafa;
 }
 
-.mypage-btn:active {
+.side-menu-item:active {
   transform: translateY(3px);
   border-bottom-width: 2px;
 }
 
+.side-menu-item-primary {
+  border: none;
+  border-bottom: 4px solid var(--duo-blue-dark);
+  background: var(--duo-blue);
+  color: white;
+}
+
+.side-menu-item-primary:hover {
+  background: #6b82ff;
+}
+
+/* AIからの返信はチャットの吹き出しのように右寄せにする(通知は左寄せと対にする)。
+   幅をコンテンツにまかせるとテキストが伸びるたびに横長になってしまうため、
+   幅を固定して文章は下方向に折り返させる */
 .ai-insight {
   position: relative;
+  align-self: flex-end;
+  width: min(76%, 260px);
   padding: 10px 32px 10px 14px;
   background: #f3ecff;
   border: 2px solid #e0d0ff;
-  border-radius: 16px;
+  border-radius: 16px 4px 16px 16px;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.06);
 }
 
@@ -411,7 +507,10 @@ html, #root {
   line-height: 1.4;
 }
 
+/* 通知(区のアラート)は左寄せにして、右寄せのAI返信と視覚的に区別する */
 .alerts {
+  align-self: flex-start;
+  max-width: 82%;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -419,7 +518,7 @@ html, #root {
 
 .alert {
   padding: 12px 16px;
-  border-radius: 14px;
+  border-radius: 4px 14px 14px 14px;
   font-size: 0.85rem;
   font-weight: 700;
   border: 2px solid transparent;
@@ -472,9 +571,8 @@ html, #root {
 }
 
 .mood-pin-face {
+  display: flex;
   transform: rotate(45deg);
-  font-size: 20px;
-  line-height: 1;
 }
 
 /* 自分の投稿ピンを目立たせる(金色のリング+星バッジ) */
@@ -866,17 +964,15 @@ html, #root {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   font-size: 0.72rem;
   color: #444;
 }
 
-.pie-legend-swatch {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  margin-right: 4px;
+.pie-legend li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .pie-empty {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { WARD_MAP, SCORE_EMOJI, WEATHER_LABEL, scoreToWeather } from '../shared/wards'
 import { MoodPieChart, MoodLineChart, CommitCalendar } from './charts'
+import { MoodFace, type MoodLevel } from './MoodFace'
 
 interface MyPost {
   id: number
@@ -141,7 +142,7 @@ function ProfileTab({ userId }: { userId: string }) {
             <>
               <span className="profile-recent-ward">{WARD_MAP[latest.ward]?.name ?? latest.ward}</span>
               <span className="profile-recent-mood">
-                {SCORE_EMOJI[latest.score]} {weather ? WEATHER_LABEL[weather] : ''}
+                <MoodFace level={latest.score as MoodLevel} size={26} /> {weather ? WEATHER_LABEL[weather] : ''}
               </span>
               {latest.comment && <p className="profile-recent-comment">「{latest.comment}」</p>}
               <span className="profile-recent-date">{formatDate(latest.createdAt)}</span>
@@ -239,7 +240,9 @@ function HistoryTab({ userId }: { userId: string }) {
           {data.posts.map((p) => (
             <div key={p.id} className="mypage-row">
               <span className="mypage-date">{formatDate(p.createdAt)}</span>
-              <span className="mypage-emoji">{SCORE_EMOJI[p.score]}</span>
+              <span className="mypage-emoji">
+                <MoodFace level={p.score as MoodLevel} size={22} />
+              </span>
               <span className="mypage-ward">{WARD_MAP[p.ward]?.name ?? p.ward}</span>
               <span className="mypage-comment">{p.comment ?? ''}</span>
             </div>

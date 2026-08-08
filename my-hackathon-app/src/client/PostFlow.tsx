@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { WARDS, findNearestWard, SCORE_EMOJI, type WardDef } from '../shared/wards'
+import { WARDS, findNearestWard, type WardDef } from '../shared/wards'
+import { MoodFace } from './MoodFace'
 
 type LocationState =
   | { status: 'locating' }
@@ -115,7 +116,7 @@ export function PostFlow({ userId, onDone }: { userId: string; onDone: () => voi
                 className={score === n ? 'score-btn selected' : 'score-btn'}
                 onClick={() => setScore(n)}
               >
-                {SCORE_EMOJI[n]}
+                <MoodFace level={n as 1 | 2 | 3 | 4 | 5} size={36} />
               </button>
             ))}
           </div>
