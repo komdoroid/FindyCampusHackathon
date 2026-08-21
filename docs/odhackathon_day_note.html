@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>お元気予報｜都知事杯オープンデータハッカソン 当日 自分用資料</title>
+  <style>
+    :root{
+      --bg:#f7f8fb;
+      --paper:#ffffff;
+      --text:#172033;
+      --muted:#667085;
+      --line:#e4e7ec;
+      --orange:#f59e0b;
+      --orange-soft:#fff7e6;
+      --blue:#2563eb;
+      --blue-soft:#eef4ff;
+      --green:#16a34a;
+      --green-soft:#ecfdf3;
+      --red:#dc2626;
+      --red-soft:#fff1f2;
+      --purple:#7c3aed;
+      --purple-soft:#f5f3ff;
+      --gray-soft:#f8fafc;
+      --shadow:0 12px 35px rgba(16,24,40,.07);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 15% 0%, rgba(245,158,11,.12), transparent 28%),
+        radial-gradient(circle at 85% 4%, rgba(37,99,235,.09), transparent 26%),
+        var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Hiragino Sans",
+        "Hiragino Kaku Gothic ProN",Meiryo,sans-serif;
+      line-height:1.75;
+    }
+
+    a{color:inherit}
+    code,pre{
+      font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+    }
+
+    .page{
+      width:min(1180px, calc(100% - 28px));
+      margin:0 auto;
+      padding:28px 0 72px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#ffb11b 0%,#ffd68a 100%);
+      border-radius:28px;
+      padding:38px 42px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      width:320px;height:320px;
+      border-radius:50%;
+      right:-120px;top:-140px;
+      background:rgba(255,255,255,.28);
+    }
+    .eyebrow{
+      display:inline-block;
+      background:rgba(255,255,255,.75);
+      border:1px solid rgba(255,255,255,.65);
+      padding:5px 11px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      margin-bottom:12px;
+    }
+    .hero h1{
+      margin:0;
+      font-size:clamp(31px,5vw,54px);
+      line-height:1.12;
+      letter-spacing:-.03em;
+    }
+    .hero .subtitle{
+      font-size:18px;
+      margin:12px 0 0;
+      max-width:860px;
+    }
+    .hero .one-line{
+      margin:22px 0 0;
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:250px minmax(0,1fr);
+      gap:20px;
+      align-items:start;
+    }
+
+    .toc{
+      position:sticky;
+      top:16px;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(8px);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:var(--shadow);
+    }
+    .toc h2{
+      font-size:14px;
+      margin:0 0 10px;
+      color:var(--muted);
+      letter-spacing:.03em;
+    }
+    .toc a{
+      display:block;
+      text-decoration:none;
+      padding:7px 9px;
+      border-radius:9px;
+      font-size:13px;
+      color:#344054;
+    }
+    .toc a:hover{background:var(--gray-soft)}
+    .toc .mini{
+      border-top:1px solid var(--line);
+      margin-top:10px;
+      padding-top:10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .content{min-width:0}
+
+    .section{
+      background:var(--paper);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+      scroll-margin-top:16px;
+    }
+    .section h2{
+      margin:0 0 8px;
+      font-size:24px;
+      letter-spacing:-.02em;
+    }
+    .section h3{
+      margin:22px 0 8px;
+      font-size:18px;
+    }
+    .lead{
+      color:var(--muted);
+      margin:0 0 18px;
+    }
+
+    .quick{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:18px;
+    }
+    .qcard{
+      padding:16px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .qcard b{display:block;margin-bottom:4px}
+    .qcard span{font-size:14px;color:var(--muted)}
+    .qcard.orange{background:var(--orange-soft);border-color:#fed7aa}
+    .qcard.blue{background:var(--blue-soft);border-color:#bfdbfe}
+    .qcard.green{background:var(--green-soft);border-color:#bbf7d0}
+
+    .compare{
+      display:grid;
+      grid-template-columns:1fr 70px 1fr;
+      align-items:stretch;
+      gap:12px;
+    }
+    .phase{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+    }
+    .phase.v1{background:var(--blue-soft)}
+    .phase.v2{background:var(--orange-soft)}
+    .phase .label{
+      font-size:12px;
+      font-weight:800;
+      color:var(--muted);
+    }
+    .phase strong{
+      display:block;
+      font-size:20px;
+      margin:4px 0 6px;
+    }
+    .arrow{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:28px;
+      color:#98a2b3;
+      font-weight:900;
+    }
+
+    .grid2,.grid3{
+      display:grid;
+      gap:12px;
+    }
+    .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:17px;
+      background:#fff;
+      min-width:0;
+    }
+    .card h4{
+      margin:0 0 6px;
+      font-size:16px;
+    }
+    .card p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+    .done{border-left:5px solid var(--blue)}
+    .now{border-left:5px solid var(--orange)}
+    .later{border-left:5px solid var(--purple)}
+    .risk{border-left:5px solid var(--red)}
+
+    .callout{
+      border-radius:16px;
+      padding:17px 18px;
+      margin:14px 0;
+      border:1px solid var(--line);
+      background:var(--gray-soft);
+    }
+    .callout strong{display:block;margin-bottom:4px}
+    .callout.orange{background:var(--orange-soft);border-color:#fed7aa}
+    .callout.green{background:var(--green-soft);border-color:#bbf7d0}
+    .callout.red{background:var(--red-soft);border-color:#fecdd3}
+    .callout.blue{background:var(--blue-soft);border-color:#bfdbfe}
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:12px 0 2px;
+      font-size:14px;
+    }
+    th,td{
+      text-align:left;
+      vertical-align:top;
+      padding:11px 12px;
+      border-bottom:1px solid var(--line);
+    }
+    th{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      background:#fafafa;
+    }
+
+    .pill{
+      display:inline-block;
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:11px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .p0{background:#fee2e2;color:#991b1b}
+    .p1{background:#fef3c7;color:#92400e}
+    .p2{background:#ede9fe;color:#5b21b6}
+    .ok{background:#dcfce7;color:#166534}
+
+    .flow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      margin-top:12px;
+    }
+    .flow span{
+      background:#f2f4f7;
+      border:1px solid #eaecf0;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:13px;
+      font-weight:800;
+    }
+    .flow b{color:#98a2b3}
+
+    pre{
+      margin:12px 0;
+      background:#101828;
+      color:#f2f4f7;
+      padding:16px;
+      border-radius:14px;
+      overflow:auto;
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .checklist{
+      display:grid;
+      gap:8px;
+    }
+    .check{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+    }
+    .check input{
+      width:18px;height:18px;
+      margin-top:3px;
+      accent-color:var(--orange);
+      flex:0 0 auto;
+    }
+    .check label{
+      cursor:pointer;
+      font-size:14px;
+    }
+    .check small{
+      display:block;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .forecast{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+    .forecast-box{
+      border-radius:18px;
+      padding:20px;
+      background:linear-gradient(145deg,#fff8e6,#fff);
+      border:1px solid #fcdba8;
+    }
+    .emoji{font-size:52px;line-height:1}
+    .score{font-size:36px;font-weight:900;line-height:1.1;margin:7px 0}
+    .reason{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      padding:9px 11px;
+      margin-top:7px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:11px;
+      font-size:13px;
+    }
+
+    ul.compact,ol.compact{
+      margin:8px 0 0;
+      padding-left:21px;
+    }
+    ul.compact li,ol.compact li{margin:4px 0}
+
+    .decision{
+      counter-reset:item;
+      display:grid;
+      gap:10px;
+    }
+    .decision-item{
+      display:grid;
+      grid-template-columns:34px minmax(0,1fr);
+      gap:10px;
+      align-items:start;
+      padding:13px;
+      border-radius:14px;
+      border:1px solid var(--line);
+    }
+    .num{
+      width:30px;height:30px;border-radius:50%;
+      display:grid;place-items:center;
+      background:var(--orange);
+      color:white;
+      font-weight:900;
+      font-size:13px;
+    }
+    .decision-item b{display:block;margin-bottom:3px}
+    .decision-item span{font-size:13px;color:var(--muted)}
+
+    .footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:12px;
+      padding-top:8px;
+    }
+
+    .print-only{display:none}
+
+    @media (max-width:900px){
+      .layout{grid-template-columns:1fr}
+      .toc{position:static}
+      .quick,.grid3{grid-template-columns:1fr}
+      .grid2,.forecast{grid-template-columns:1fr}
+      .compare{grid-template-columns:1fr}
+      .arrow{transform:rotate(90deg)}
+    }
+
+    @media (max-width:560px){
+      .page{width:min(100% - 16px,1180px);padding-top:10px}
+      .hero{padding:26px 20px;border-radius:20px}
+      .section{padding:20px;border-radius:16px}
+      th,td{padding:9px 8px}
+    }
+
+    @media print{
+      body{background:#fff}
+      .page{width:100%;padding:0}
+      .hero,.section,.toc{box-shadow:none}
+      .toc{display:none}
+      .layout{display:block}
+      .section{break-inside:avoid;page-break-inside:avoid}
+      .hero{border:1px solid #ddd}
+      .check input{appearance:none;border:1px solid #999;border-radius:2px}
+      .print-only{display:block}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div class="eyebrow">都知事杯オープンデータハッカソン / Hackathon Day Notes</div>
+    <h1>お元気予報<br>当日 自分用資料</h1>
+    <p class="subtitle">
+      前回の実装を土台に、都知事杯オープンデータハッカソンでどこまで進化させるかを判断するためのメモ。
+      「議論」「実装」「デモ」「発表」で迷ったときに戻る場所。
+    </p>
+    <p class="one-line">今回の主役候補：<strong>「自分の気分 × 街のオープンデータ」からつくる、自分専用の気分予報</strong></p>
+  </header>
+
+  <div class="layout">
+    <aside class="toc">
+      <h2>目次</h2>
+      <a href="#summary">0. 30秒サマリー</a>
+      <a href="#background">1. 背景・前提</a>
+      <a href="#v1">2. 前回までにあるもの</a>
+      <a href="#vision">3. 今回の狙い</a>
+      <a href="#opendata">4. オープンデータ戦略</a>
+      <a href="#requirements">5. 機能要件</a>
+      <a href="#forecast">6. 気分予報ロジック</a>
+      <a href="#coldstart">7. コールドスタート</a>
+      <a href="#ai">8. AIの責務</a>
+      <a href="#privacy">9. プライバシー・表現</a>
+      <a href="#architecture">10. 技術・データ設計</a>
+      <a href="#team">11. 5人の役割案</a>
+      <a href="#dayplan">12. 当日の進め方</a>
+      <a href="#questions">13. 最初に確認すること</a>
+      <a href="#demo">14. デモ案</a>
+      <a href="#risks">15. リスクと逃げ道</a>
+      <a href="#repo">16. Repo把握メモ</a>
+      <a href="#done">17. 完成条件</a>
+      <div class="mini">
+        チェックボックスはブラウザ上で保持されます。<br>
+        印刷時は目次を非表示にします。
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <section id="summary" class="section">
+        <h2>0. 30秒で思い出す</h2>
+        <p class="lead">当日、話が広がりすぎたらここに戻る。</p>
+
+        <div class="quick">
+          <div class="qcard blue">
+            <b>前回</b>
+            <span>街の「今の気分」を可視化。気分投稿・地図・個人履歴・天気との関連分析まで。</span>
+          </div>
+          <div class="qcard orange">
+            <b>今回</b>
+            <span>「なぜそうなる？」と「明日はどうなりそう？」まで進める。</span>
+          </div>
+          <div class="qcard green">
+            <b>主役</b>
+            <span>本人の過去データに基づく、説明可能な「自分専用の気分予報」。</span>
+          </div>
+        </div>
+
+        <div class="callout orange">
+          <strong>一本で言うなら</strong>
+          「街の気分を見るアプリ」から、「自分の気分と街のデータを掛け合わせ、自分の取扱説明書が育っていくアプリ」へ。
+        </div>
+
+        <div class="callout blue">
+          <strong>都知事杯向けの一言</strong>
+          <b>「自分の気分」×「街が持っているオープンデータ」</b>で、
+          自分だけでは気づけない気分の傾向を見つけ、明日の予報と行動につなげる。
+        </div>
+
+        <div class="flow">
+          <span>記録</span><b>→</b>
+          <span>可視化</span><b>→</b>
+          <span>傾向発見</span><b>→</b>
+          <span>未来予報</span><b>→</b>
+          <span>軽い改善提案</span>
+        </div>
+      </section>
+
+      <section id="background" class="section">
+        <h2>1. 背景・前提</h2>
+        <p class="lead">
+          前回ハッカソンは3人。今回は自分を含め2人が加わり、5人体制になる想定。
+          自分は前回参加していないので、まず「既存実装を壊さず理解する」ことが重要。
+        </p>
+
+        <h3>プロダクトの将来像として出ている5項目</h3>
+        <ol class="compact">
+          <li>個人が自身の精神状態を管理・把握するための補助</li>
+          <li>利用者のエリアごとの気分の可視化</li>
+          <li>エリア・イベント・季節・事故・天気など、事象に合わせた気分変動の把握・予測</li>
+          <li>蓄積データによる、個人に合わせた気分予報と簡単な改善案の提示</li>
+          <li>蓄積データによる、エリア等の集団の気分傾向の把握・提示</li>
+        </ol>
+
+        <div class="callout blue">
+          <strong>重要な理解</strong>
+          前回は③の途中、「天気 × 気分」の関連付けまで進んでいる。
+          したがって今回は新規アプリを作るのではなく、<b>v1をv2へ拡張する</b>イメージ。
+        </div>
+
+        <div class="callout orange">
+          <strong>今回の大会で追加される重要条件</strong>
+          今回は<b>都知事杯オープンデータハッカソン</b>。
+          したがって「既存アプリにオープンデータを載せる」のではなく、
+          <b>オープンデータが分析・予報・提案のどれかを実際に変える設計</b>にしたい。
+        </div>
+      </section>
+
+      <section id="v1" class="section">
+        <h2>2. 前回までにあるもの</h2>
+        <p class="lead">Repoを見る限り、想像よりかなり実装が進んでいる。ここを作り直す必要はない。</p>
+
+        <div class="grid2">
+          <div class="card done">
+            <h4>✅ 気分投稿</h4>
+            <p>1〜5の気分スコア、コメント、位置情報から東京23区判定、匿名UUID。</p>
+          </div>
+          <div class="card done">
+            <h4>✅ 地域気分マップ</h4>
+            <p>Leaflet + OpenStreetMap + 東京23区ポリゴン。区ごとの気分を地図上で可視化。</p>
+          </div>
+          <div class="card done">
+            <h4>✅ 個人マイページ</h4>
+            <p>最近の投稿、気分割合、7日推移、13週カレンダー、履歴、SNS共有など。</p>
+          </div>
+          <div class="card done">
+            <h4>✅ 天気 × 気分分析</h4>
+            <p>Open-Meteoと本人の直近投稿を使い、Workers AIが分析コメントを生成。</p>
+          </div>
+          <div class="card done">
+            <h4>✅ Cloudflare基盤</h4>
+            <p>Workers + Hono + React + D1 + Workers AI。デプロイ済みの構成。</p>
+          </div>
+          <div class="card done">
+            <h4>✅ 匿名性への配慮</h4>
+            <p>位置は区判定にのみ使用し、緯度経度をDBに保存しない設計。</p>
+          </div>
+        </div>
+
+        <h3>前回 → 今回</h3>
+        <div class="compare">
+          <div class="phase v1">
+            <div class="label">v1</div>
+            <strong>街の気分を「見る」</strong>
+            「今、街はどんな気分？」を天気のように可視化する。
+          </div>
+          <div class="arrow">→</div>
+          <div class="phase v2">
+            <div class="label">v2</div>
+            <strong>「お元気予報」へ</strong>
+            「なぜそうなる？」「明日はどうなりそう？」を、街のオープンデータも使って答える。
+          </div>
+        </div>
+      </section>
+
+      <section id="vision" class="section">
+        <h2>3. 今回の狙い</h2>
+        <p class="lead">機能を増やすより、「ユーザーに何が新しく分かるか」を主語にする。</p>
+
+        <div class="callout green">
+          <strong>プロダクト原則</strong>
+          ユーザーが気分を記録するたびに、「記録して終わり」ではなく、
+          <b>自分について何か1つ新しく分かること。</b>
+        </div>
+
+        <h3>今回の価値</h3>
+        <div class="grid2">
+          <div class="card now">
+            <h4>① 自分の傾向が分かる</h4>
+            <p>「雨の日は低め」「金曜日は高め」「最近下降傾向」など。</p>
+          </div>
+          <div class="card now">
+            <h4>② 明日の予報が出る</h4>
+            <p>本人の履歴と明日の条件から、予想気分スコアを表示。</p>
+          </div>
+          <div class="card now">
+            <h4>③ なぜその予報か分かる</h4>
+            <p>ブラックボックスにせず、予測要因と寄与を表示。</p>
+          </div>
+          <div class="card now">
+            <h4>④ 自分に合った小さな提案</h4>
+            <p>一般論ではなく、「過去の自分のデータ」から改善案を出す。</p>
+          </div>
+        </div>
+
+        <h3>今回の主役にしないもの</h3>
+        <div class="grid2">
+          <div class="card later">
+            <h4>集団の高度分析</h4>
+            <p>地域・属性・イベントごとの長期傾向は将来価値として見せる。</p>
+          </div>
+          <div class="card later">
+            <h4>事故・ニュースの本格連携</h4>
+            <p>取得・分類・地域紐付け・因果解釈が重い。今回のMVPでは避ける。</p>
+          </div>
+        </div>
+      </section>
+
+      
+      <section id="opendata" class="section">
+        <h2>4. オープンデータ戦略</h2>
+        <p class="lead">
+          都知事杯ではここが企画の芯。オープンデータを「添える」のではなく、
+          <b>本人の気分データだけでは分からない“街側の文脈”を与える材料</b>として使う。
+        </p>
+
+        <div class="callout orange">
+          <strong>基本コンセプト</strong>
+          本人が記録する「気分」と、都市が公開する「その日・その場所の状況」を掛け合わせる。<br>
+          <b>Personal Mood Data × Urban Open Data → お元気予報</b>
+        </div>
+
+        <h3>オープンデータを使う目的</h3>
+        <div class="grid3">
+          <div class="card now">
+            <h4>① 気分の背景を知る</h4>
+            <p>天候・大気・イベント・季節など、「本人の内側」だけではない条件を特徴量にする。</p>
+          </div>
+          <div class="card now">
+            <h4>② 個人予報を豊かにする</h4>
+            <p>「雨の日」「イベントのある日」「大気状況が違う日」など、本人固有の傾向を探す。</p>
+          </div>
+          <div class="card later">
+            <h4>③ 街の傾向へ広げる</h4>
+            <p>十分な匿名データが蓄積したら、エリア単位の長期傾向も分析可能にする。</p>
+          </div>
+        </div>
+
+        <h3>最重要ルール：オープンデータを“飾り”にしない</h3>
+        <div class="callout red">
+          <strong>弱い使い方</strong>
+          「東京都には公園が○件あります」「イベント情報を別画面に一覧表示します」だけでは、
+          お元気予報の価値と接続しない。
+        </div>
+        <div class="callout green">
+          <strong>強い使い方</strong>
+          オープンデータの値が、<b>傾向分析・予報・理由表示・改善提案のどれかに直接影響する</b>状態にする。
+          「このデータを外すと結果が変わる」が目安。
+        </div>
+
+        <h3>候補データと優先順位</h3>
+        <p>
+          「リアルタイムかどうか」だけではなく、<b>何のために使うデータか</b>で整理する。
+          お元気予報では、<b>未来を予報する / 今を解釈する / 行動につなげる / 集団傾向を見る</b>の4役に分けると考えやすい。
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>候補</th>
+              <th>主な役割</th>
+              <th>お元気予報での使い方</th>
+              <th>未来値</th>
+              <th>相性</th>
+              <th>実装難度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>暑さ指数（WBGT）</b></td>
+              <td>予報</td>
+              <td>本人が「暑い日に下がりやすい」傾向なら、翌日のWBGT予測を気分予報の補正に使う。</td>
+              <td>◎</td>
+              <td>★★★★★</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td><b>イベント予定</b></td>
+              <td>予報</td>
+              <td>イベント開催日と通常日の気分差を分析。翌日の開催予定を未来特徴量にする。</td>
+              <td>◎</td>
+              <td>★★★★★</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td><b>天気</b></td>
+              <td>予報</td>
+              <td>既存Open-Meteoを継続。晴れ・雨・気温などを個人予報の基本特徴量にする。</td>
+              <td>◎</td>
+              <td>★★★★★</td>
+              <td>低（既存）</td>
+            </tr>
+            <tr>
+              <td><b>花粉</b></td>
+              <td>現在 / 予報</td>
+              <td>花粉量が多い時期・日に本人の気分が下がる傾向があるかを見る。予測値が取れる場合は翌日予報にも利用。</td>
+              <td>△〜○</td>
+              <td>★★★★☆</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td><b>公共交通の運行状況</b></td>
+              <td>現在</td>
+              <td>通勤時間帯の遅延・運休と、その日の気分との関連を分析。「今日のお元気コンディション」に向く。</td>
+              <td>△</td>
+              <td>★★★★☆</td>
+              <td>中〜高</td>
+            </tr>
+            <tr>
+              <td><b>PM2.5 / 大気環境</b></td>
+              <td>現在 / 過去分析</td>
+              <td>速報値・過去値と気分を突き合わせる。明日予報より「今日の解釈」と「過去傾向」に向く。</td>
+              <td>△</td>
+              <td>★★★☆☆</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td><b>公園・緑地</b></td>
+              <td>行動提案</td>
+              <td>「散歩した日は気分が高い」など本人傾向があるとき、実際に行ける近隣候補を提示。</td>
+              <td>―</td>
+              <td>★★★★★</td>
+              <td>低〜中</td>
+            </tr>
+            <tr>
+              <td><b>スポーツ施設</b></td>
+              <td>行動提案</td>
+              <td>運動が本人の気分と正の関連を持つ場合、公共スポーツ施設を具体的な行動候補として提示。</td>
+              <td>―</td>
+              <td>★★★★☆</td>
+              <td>低〜中</td>
+            </tr>
+            <tr>
+              <td><b>文化施設・図書館</b></td>
+              <td>行動提案</td>
+              <td>静かな外出・読書など本人の傾向と結びつく場合に提案候補として使う。</td>
+              <td>―</td>
+              <td>★★★★☆</td>
+              <td>低〜中</td>
+            </tr>
+            <tr>
+              <td><b>クーリングシェルター</b></td>
+              <td>行動提案</td>
+              <td>WBGTが高い日に「外に出ない」だけでなく、涼める公共施設へつなげる。</td>
+              <td>―</td>
+              <td>★★★★☆</td>
+              <td>低〜中</td>
+            </tr>
+            <tr>
+              <td><b>人口・年齢構成</b></td>
+              <td>集団分析</td>
+              <td>地域投稿数の代表性や人口1万人あたり投稿数など、地域比較の補助指標に使う。</td>
+              <td>―</td>
+              <td>★★★☆☆</td>
+              <td>低</td>
+            </tr>
+            <tr>
+              <td><b>人流・混雑</b></td>
+              <td>集団分析 / 現在</td>
+              <td>混雑度と地域気分の関係を見る。良いリアルタイムデータが見つかれば面白いが、今回は優先度低。</td>
+              <td>△</td>
+              <td>★★★☆☆</td>
+              <td>高</td>
+            </tr>
+            <tr>
+              <td><b>事故・犯罪・災害実績</b></td>
+              <td>将来候補</td>
+              <td>地域事象との関連分析。ただし時間粒度・影響範囲・ネガティブな地域ラベリングに注意。</td>
+              <td>×〜△</td>
+              <td>★★☆☆☆</td>
+              <td>高</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>用途別に見るとこうなる</h3>
+        <div class="grid2">
+          <div class="card now">
+            <h4>未来を予報するデータ</h4>
+            <p>
+              <b>天気 / WBGT / イベント予定 / （取れれば）花粉予測</b><br>
+              「明日のお元気予報」に直接入れやすい。今回のP0候補はここから選びたい。
+            </p>
+          </div>
+          <div class="card done">
+            <h4>今を解釈するデータ</h4>
+            <p>
+              <b>公共交通の運行状況 / PM2.5 / 花粉速報</b><br>
+              「なぜ今日はしんどいか」「今日のお元気コンディション」に向く。
+            </p>
+          </div>
+          <div class="card now">
+            <h4>行動につなげるデータ</h4>
+            <p>
+              <b>公園・緑地 / スポーツ施設 / 文化施設 / クーリングシェルター</b><br>
+              本人の過去傾向を「実際に行ける場所」に接続する。
+            </p>
+          </div>
+          <div class="card later">
+            <h4>集団傾向を見るデータ</h4>
+            <p>
+              <b>人口・年齢構成 / 人流・混雑</b><br>
+              将来的な地域分析や投稿データの代表性評価に使う。
+            </p>
+          </div>
+        </div>
+
+        <h3>当日の現実的な採用方針</h3>
+        <div class="grid2">
+          <div class="card now">
+            <h4>P0：予報に効くODを1本</h4>
+            <p>
+              第一候補は<b>イベント予定</b>または<b>WBGT</b>。
+              「未来の条件」が分かるため、「お元気予報」のコンセプトに直接つながる。
+            </p>
+          </div>
+          <div class="card now">
+            <h4>P1：改善提案に効くODを1本</h4>
+            <p>
+              <b>公園・緑地 / クーリングシェルター / スポーツ施設</b>など。
+              「予報 → あなた向けの小さな行動」まで一続きにできると強い。
+            </p>
+          </div>
+        </div>
+
+        <div class="callout green">
+          <strong>かなり相性が良い組み合わせ</strong>
+          <b>WBGT → お元気予報 → クーリングシェルター / 公園</b><br>
+          あるいは<br>
+          <b>イベント予定 → お元気予報 → 地域の気分天気図</b><br>
+          のように、「予測材料」と「その後の行動・地域体験」まで接続させる。
+        </div>
+
+        <h3>既存の天気データとの位置づけ</h3>
+        <p>
+          Open-Meteoによる天気連携は既存資産として残す。ただし今回の都知事杯では、
+          <b>東京都・自治体が公開するオープンデータも別に1種類以上、主要ロジックへ組み込む</b>方針が分かりやすい。
+        </p>
+
+        <div class="callout blue">
+          <strong>PM2.5の扱いは「未来予報」ではなく「現在・過去分析」寄り</strong>
+          速報値が取れても、翌日の予測値が取れないなら「明日のお元気予報」の主特徴にはしにくい。
+          過去データから本人傾向を見つけたり、今日の状態を解釈したりする用途で使う。
+        </div>
+
+        <h3>データを共通形式へ変換する</h3>
+        <pre>ユーザー気分
+  user_id / ward / datetime / score
+            │
+            ├── 天気
+            ├── 曜日・季節
+            ├── イベントOD
+            └── 大気環境OD
+                    ↓
+            context_features
+                    ↓
+            個人傾向分析
+                    ↓
+              お元気予報</pre>
+
+        <p>
+          各オープンデータの生形式を予報ロジックに直接食わせるのではなく、
+          最終的には「区 × 日付（必要なら時間帯）」単位の特徴量へ正規化する。
+          これにより、後から別のオープンデータを追加しやすくする。
+        </p>
+
+        <h3>データごとに必ず残すメタ情報</h3>
+        <table>
+          <thead><tr><th>項目</th><th>残す内容</th></tr></thead>
+          <tbody>
+            <tr><td>データセット名</td><td>正式名称</td></tr>
+            <tr><td>提供元</td><td>東京都 / 区市町村 / その他公的機関</td></tr>
+            <tr><td>取得元URL</td><td>カタログまたは配布元</td></tr>
+            <tr><td>ライセンス</td><td>利用条件・表示条件を確認</td></tr>
+            <tr><td>取得日</td><td>デモ時点でいつ取得したか</td></tr>
+            <tr><td>更新頻度</td><td>リアルタイム / 日次 / 月次など</td></tr>
+            <tr><td>変換処理</td><td>区への変換、日次集約、欠損処理など</td></tr>
+            <tr><td>利用箇所</td><td>どの予報・分析・提案に効いているか</td></tr>
+          </tbody>
+        </table>
+
+        <h3>オープンデータ採用判断チェック</h3>
+        <div class="checklist">
+          <div class="check"><input id="od1" type="checkbox"><label for="od1">公式の配布元・ライセンスを確認した<small>READMEにも出典を残す。</small></label></div>
+          <div class="check"><input id="od2" type="checkbox"><label for="od2">東京23区 / 日時と結合できる粒度か確認した<small>Joinできないデータは分析に使いづらい。</small></label></div>
+          <div class="check"><input id="od3" type="checkbox"><label for="od3">欠損・更新頻度・対象期間を確認した<small>「最新データのはず」が一番危険。</small></label></div>
+          <div class="check"><input id="od4" type="checkbox"><label for="od4">このデータを外すと何が変わるか説明できる<small>飾り利用を避ける。</small></label></div>
+          <div class="check"><input id="od5" type="checkbox"><label for="od5">デモ画面でデータ利用箇所を見せられる<small>予測理由欄などで出典も見せると強い。</small></label></div>
+        </div>
+      </section>
+
+      <section id="requirements" class="section">
+        <h2>5. 機能要件</h2>
+        <p class="lead">P0を全部終えるまではP1・P2に手を出さない。</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>優先度</th>
+              <th>機能</th>
+              <th>内容</th>
+              <th>完成イメージ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="pill p0">P0</span></td>
+              <td><b>個人傾向分析</b></td>
+              <td>天気・曜日・直近トレンド等と本人の気分の関係を計算。</td>
+              <td>「雨の日 -0.6」「金曜 +0.3」</td>
+            </tr>
+            <tr>
+              <td><span class="pill p0">P0</span></td>
+              <td><b>明日の気分予報</b></td>
+              <td>明日の条件と本人履歴から予測値を算出。</td>
+              <td>「明日は 3.7 / 5」</td>
+            </tr>
+            <tr>
+              <td><span class="pill p0">P0</span></td>
+              <td><b>予測理由表示</b></td>
+              <td>予測に効いた要素をユーザーに見せる。</td>
+              <td>「晴れ +0.4 / 金曜 +0.3」</td>
+            </tr>
+            <tr>
+              <td><span class="pill p0">P0</span></td>
+              <td><b>信頼度表示</b></td>
+              <td>データ件数・条件一致件数から予報の確からしさを表現。</td>
+              <td>低 / 中 / 高</td>
+            </tr>
+            <tr>
+              <td><span class="pill p0">P0</span></td>
+              <td><b>東京都オープンデータ統合</b></td>
+              <td>イベントまたは大気環境など最低1種類を、傾向分析・予報・理由のいずれかへ直接利用。</td>
+              <td>「ODを外すと結果が変わる」状態</td>
+            </tr>
+            <tr>
+              <td><span class="pill p1">P1</span></td>
+              <td><b>改善提案</b></td>
+              <td>本人の過去行動と気分の関係から軽い提案。</td>
+              <td>「散歩した日は +0.4」</td>
+            </tr>
+            <tr>
+              <td><span class="pill p1">P1</span></td>
+              <td><b>行動タグ</b></td>
+              <td>散歩・運動・残業・飲酒など、分析に使える軽量タグ。</td>
+              <td>投稿時に数タップ</td>
+            </tr>
+            <tr>
+              <td><span class="pill p2">P2</span></td>
+              <td><b>イベント連携</b></td>
+              <td>地域イベント等との関連を試験的に表示。</td>
+              <td>将来展望でも可</td>
+            </tr>
+            <tr>
+              <td><span class="pill p2">P2</span></td>
+              <td><b>集団傾向分析</b></td>
+              <td>地域・季節などの匿名集団傾向を長期分析。</td>
+              <td>将来展望</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>ユーザーフロー</h3>
+        <div class="flow">
+          <span>気分を投稿</span><b>→</b>
+          <span>履歴が蓄積</span><b>→</b>
+          <span>個人傾向を発見</span><b>→</b>
+          <span>明日の気分予報</span><b>→</b>
+          <span>根拠を見る</span><b>→</b>
+          <span>軽い提案</span>
+        </div>
+      </section>
+
+      <section id="forecast" class="section">
+        <h2>6. 気分予報ロジック</h2>
+        <p class="lead">
+          ハッカソンでは「高度なML」より、説明可能でデモしやすいロジックを優先。
+        </p>
+
+        <div class="forecast">
+          <div class="forecast-box">
+            <div class="emoji">🌤</div>
+            <div class="score">3.7 / 5</div>
+            <b>明日のあなたの気分予報</b>
+            <p>やや晴れ。最近の傾向と明日の条件から、今日より少し持ち直す予想。</p>
+          </div>
+          <div>
+            <div class="reason"><span>☀️ 晴れの日</span><b>+0.4</b></div>
+            <div class="reason"><span>📅 金曜日</span><b>+0.3</b></div>
+            <div class="reason"><span>📉 直近7日トレンド</span><b>-0.2</b></div>
+            <div class="reason"><span>📊 データ量</span><b>28件</b></div>
+          </div>
+        </div>
+
+        <h3>最小実装の考え方</h3>
+        <pre>baseline = 直近7日または14日の本人平均
+
+weather_adjustment
+  = 同じ天気の日の本人平均 - 本人全体平均
+
+weekday_adjustment
+  = 対象曜日の本人平均 - 本人全体平均
+
+trend_adjustment
+  = 最近の上昇 / 下降傾向を小さく補正
+
+open_data_adjustment
+  = 採用した東京都ODの該当条件における本人平均との差
+    例: イベント開催日 / PM2.5帯など
+
+forecast
+  = baseline
+  + weather_adjustment
+  + weekday_adjustment
+  + trend_adjustment
+  + open_data_adjustment
+
+forecast = 1.0〜5.0 に clamp</pre>
+
+        <div class="callout blue">
+          <strong>重要</strong>
+          「3.7」という値をAIに作らせない。数値はコードで計算し、AIは説明文の生成だけに使う。
+        </div>
+
+        <h3>将来的な発展</h3>
+        <ul class="compact">
+          <li>温度帯、気圧、湿度、季節、時間帯</li>
+          <li>行動タグ（運動、散歩、残業、飲酒、友人との交流等）</li>
+          <li>単純回帰 / 決定木 / 時系列モデルなどへの置き換え</li>
+          <li>ただし「説明可能性」は残す</li>
+        </ul>
+      </section>
+
+      <section id="coldstart" class="section">
+        <h2>7. コールドスタート</h2>
+        <p class="lead">新規ユーザーはデータがない。ここを無視すると「予報アプリ」として破綻する。</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>記録数</th>
+              <th>表示</th>
+              <th>意味</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0〜2件</td>
+              <td>「記録をためています」</td>
+              <td>地域の気分・今日の振り返りを中心に見せる</td>
+            </tr>
+            <tr>
+              <td>3〜6件</td>
+              <td>「少し傾向が見えてきました」</td>
+              <td>単純な曜日・天気傾向を限定表示</td>
+            </tr>
+            <tr>
+              <td>7〜19件</td>
+              <td>簡易予報</td>
+              <td>信頼度は低〜中として表示</td>
+            </tr>
+            <tr>
+              <td>20件以上</td>
+              <td>個人予報</td>
+              <td>複数要因＋理由表示</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout orange">
+          <strong>デモでは</strong>
+          過去30日程度の「デモユーザー」をシードしておく。リアルに当日投稿を積み上げて予報を成立させようとしない。
+        </div>
+      </section>
+
+      <section id="ai" class="section">
+        <h2>8. AIの責務</h2>
+
+        <div class="grid2">
+          <div class="card done">
+            <h4>AIにやらせる</h4>
+            <p>
+              数値結果の文章化／予測理由のやさしい説明／
+              医療的でない軽い提案文／将来的には自由記述のタグ化。
+            </p>
+          </div>
+          <div class="card risk">
+            <h4>AIにやらせない</h4>
+            <p>
+              予測スコアそのもの／統計計算／地域集計／診断／
+              「あなたは○○状態です」の断定。
+            </p>
+          </div>
+        </div>
+
+        <pre>投稿・外部データ
+      ↓
+統計 / 予測ロジック
+      ↓
+forecast = 3.7
+reasons = [晴れ +0.4, 金曜 +0.3, trend -0.2]
+      ↓
+LLM
+      ↓
+「明日は比較的気分が上向きやすい条件です」</pre>
+
+        <div class="callout green">
+          <strong>「ChatGPTでよくない？」への答え</strong>
+          LLMに気分を当ててもらうサービスではなく、本人が蓄積した時系列データを分析し、
+          その人自身の傾向を予報に変えるサービス。LLMは伝達レイヤー。
+        </div>
+      </section>
+
+      <section id="privacy" class="section">
+        <h2>9. プライバシー・表現</h2>
+        <p class="lead">気分 + 位置情報はセンシティブ。MVPでも最低限の設計原則を守る。</p>
+
+        <div class="grid2">
+          <div class="card done">
+            <h4>位置情報</h4>
+            <p>現在地はエリア判定にのみ使用。緯度経度はDBに保存しない既存方針を継続。</p>
+          </div>
+          <div class="card done">
+            <h4>匿名性</h4>
+            <p>ログインなしの匿名ID。地域集計は一定件数未満なら非表示。</p>
+          </div>
+          <div class="card risk">
+            <h4>診断しない</h4>
+            <p>「うつ」「躁」などの診断・断定表現は避け、あくまで本人の気分記録として扱う。</p>
+          </div>
+          <div class="card risk">
+            <h4>因果を断定しない</h4>
+            <p>「雨のせいで悪化した」ではなく「雨の日に低い傾向がある」と表現。</p>
+          </div>
+        </div>
+
+        <div class="callout red">
+          <strong>言葉の注意</strong>
+          「精神状態予測」「メンタル変動予測」は強すぎる可能性がある。
+          発表では「気分傾向」「気分予報」「関連が見える」を中心にすると安全。
+        </div>
+      </section>
+
+      <section id="architecture" class="section">
+        <h2>10. 技術・データ設計</h2>
+        <p class="lead">既存構成を活かし、差分だけ作る。</p>
+
+        <h3>既存スタック</h3>
+        <table>
+          <tbody>
+            <tr><th>Frontend</th><td>React 19 / Leaflet / 自作SVGチャート</td></tr>
+            <tr><th>Backend</th><td>Cloudflare Workers / Hono</td></tr>
+            <tr><th>DB</th><td>Cloudflare D1 (SQLite)</td></tr>
+            <tr><th>Weather</th><td>Open-Meteo</td></tr>
+            <tr><th>AI</th><td>Cloudflare Workers AI</td></tr>
+            <tr><th>Language</th><td>TypeScript</td></tr>
+          </tbody>
+        </table>
+
+        <h3>追加を検討するデータ</h3>
+        <pre>mood_entries
+  id
+  user_id
+  ward
+  score
+  comment
+  created_at
+
+mood_tags              ← P1
+  mood_id
+  tag
+
+context_features       ← 外部データを共通特徴量へ正規化
+  date
+  time_slot
+  ward
+  weather
+  temperature
+  weekday
+  season
+
+  # 予報系
+  wbgt
+  event_count
+  pollen_level
+
+  # 現在・過去分析系
+  pm25_level
+  transit_disruption
+
+  data_sources_json
+
+forecast_cache         ← デモ安定化用に有効
+  user_id
+  target_date
+  forecast_score
+  confidence
+  reasons_json
+  created_at</pre>
+
+        <h3>API差分案</h3>
+        <pre>GET /api/moods/mine/insights?userId=...
+  → 個人傾向一覧
+
+GET /api/forecast?userId=...
+  → 明日の予報値 / confidence / reasons / dataSources
+
+GET /api/context?ward=...&date=...
+  → 天気 + 採用したオープンデータの正規化済み特徴量
+
+POST /api/moods
+  → P1なら tags も受付</pre>
+
+        <div class="callout blue">
+          <strong>実装前に確認</strong>
+          既存の /api/insight がどこまで再利用できるか。
+          「AIコメント生成API」をそのまま予報APIに拡張するのか、分析ロジックを別モジュールに切り出すのかを決める。
+        </div>
+      </section>
+
+      <section id="team" class="section">
+        <h2>11. 5人の役割案</h2>
+        <p class="lead">前回参加者3人には既存コード知識がある。新規2人は「外から見た違和感」を出せる。</p>
+
+        <table>
+          <thead>
+            <tr><th>担当</th><th>主な仕事</th><th>向いている人</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A</td>
+              <td>既存基盤・DB・API把握、デプロイ管理</td>
+              <td>前回参加者</td>
+            </tr>
+            <tr>
+              <td>B</td>
+              <td>個人傾向分析・予報ロジック</td>
+              <td>ロジック担当</td>
+            </tr>
+            <tr>
+              <td>C</td>
+              <td>東京都オープンデータ選定・ETL・天気等の外部特徴量統合</td>
+              <td>オープンデータ / ETL担当</td>
+            </tr>
+            <tr>
+              <td>D</td>
+              <td>予報画面・理由表示・UX</td>
+              <td>フロント担当</td>
+            </tr>
+            <tr>
+              <td>E</td>
+              <td>行動タグ・提案 / シード / デモ / 発表整理</td>
+              <td>横断担当</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout orange">
+          <strong>自分の入り方</strong>
+          前回コードを知らないからこそ、最初に「この画面を初見で理解できるか」「今回何が新しいのか」を問い続ける。
+          既存の人に遠慮せず、プロダクト軸の整理を担当してもよい。
+        </div>
+      </section>
+
+      <section id="dayplan" class="section">
+        <h2>12. 当日の進め方</h2>
+        <p class="lead">時間が短いハッカソンほど、最初の30〜45分の意思決定が重要。</p>
+
+        <table>
+          <thead>
+            <tr><th>時間</th><th>やること</th><th>終了条件</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0〜30分</td>
+              <td>既存アプリを全員で触る / Repo説明 / 今回のゴール決定 / OD候補を確認</td>
+              <td>主役と、P0で使うオープンデータ候補が絞れている</td>
+            </tr>
+            <tr>
+              <td>30〜45分</td>
+              <td>役割分担 / API I/F / ODのJoinキー・正規化形式を決める</td>
+              <td>誰が何を作るか、どのデータをどう使うか曖昧でない</td>
+            </tr>
+            <tr>
+              <td>45分〜</td>
+              <td>並行実装</td>
+              <td>各担当が独立して進められる</td>
+            </tr>
+            <tr>
+              <td>中盤</td>
+              <td>統合 / 本番デプロイ / シードデータ</td>
+              <td>最低限のデモが動く</td>
+            </tr>
+            <tr>
+              <td>終盤</td>
+              <td>UI調整 / 発表 / リハーサル</td>
+              <td>デモを2回通せる</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>当日チェック</h3>
+        <div class="checklist">
+          <div class="check"><input id="c1" type="checkbox"><label for="c1">既存アプリを全員で実際に触った<small>コード説明だけで済ませない。</small></label></div>
+          <div class="check"><input id="c2" type="checkbox"><label for="c2">今回の「主役」を1文で決めた<small>例：自分専用の気分予報。</small></label></div>
+          <div class="check"><input id="c3" type="checkbox"><label for="c3">P0 / P1 / P2を決めた<small>P0以外は捨てられる状態にする。</small></label></div>
+          <div class="check"><input id="c4" type="checkbox"><label for="c4">予報ロジックのI/Fを決めた<small>入力・出力JSONだけでもよい。</small></label></div>
+          <div class="check"><input id="c4b" type="checkbox"><label for="c4b">採用するオープンデータ・Joinキー・利用箇所を決めた<small>最低1種類はP0ロジックへ直接入れる。</small></label></div>
+          <div class="check"><input id="c5" type="checkbox"><label for="c5">本番デプロイを早めに確認した<small>最後に初デプロイは危険。</small></label></div>
+          <div class="check"><input id="c6" type="checkbox"><label for="c6">デモ用ユーザーの過去データを用意した<small>予報画面を空にしない。</small></label></div>
+          <div class="check"><input id="c7" type="checkbox"><label for="c7">AI失敗時のフォールバックがある<small>AIで投稿・予報全体を落とさない。</small></label></div>
+          <div class="check"><input id="c8" type="checkbox"><label for="c8">発表デモを2回通した<small>本番URL・スマホでも確認。</small></label></div>
+        </div>
+      </section>
+
+      <section id="questions" class="section">
+        <h2>13. 最初に前回メンバーへ確認すること</h2>
+
+        <div class="decision">
+          <div class="decision-item"><div class="num">1</div><div><b>前回、実際にどこまで完成していた？</b><span>仕様書ではなく「本番で動いた機能」を確認。</span></div></div>
+          <div class="decision-item"><div class="num">2</div><div><b>現在の本番URL・Cloudflare環境はそのまま触れる？</b><span>権限・D1・Workers AI・デプロイ方法。</span></div></div>
+          <div class="decision-item"><div class="num">3</div><div><b>今の /api/insight はどう動いている？</b><span>AIの入力、キャッシュ、天気データの使い方。</span></div></div>
+          <div class="decision-item"><div class="num">4</div><div><b>既存DBにどれくらい実データ・シードがある？</b><span>予報にそのまま使えるか、再生成が必要か。</span></div></div>
+          <div class="decision-item"><div class="num">5</div><div><b>前回、一番苦労したところは？</b><span>地図・AI・D1・デプロイ等。今回同じ罠を踏まない。</span></div></div>
+          <div class="decision-item"><div class="num">6</div><div><b>今回、前回メンバー自身は何を進めたい？</b><span>自分が決めすぎず、各人のモチベーションを把握。</span></div></div>
+        </div>
+
+        <h3>チームで決めたい7論点</h3>
+        <ol class="compact">
+          <li>今回の主役を「個人向け気分予報」にするか</li>
+          <li><b>どの東京都オープンデータをP0で使い、何に効かせるか</b></li>
+          <li><b>そのデータは Historical / Current / Future のどこで使うか</b></li>
+          <li>予報に使う要因をどこまでにするか</li>
+          <li>改善案を本人データ起点にするか</li>
+          <li>何件から予報を出すか / 信頼度をどう見せるか</li>
+          <li>「予測」「傾向」「相関」の言葉をどう使い分けるか</li>
+        </ol>
+      </section>
+
+      <section id="demo" class="section">
+        <h2>14. デモ案</h2>
+        <p class="lead">技術紹介ではなく、ユーザーの体験として一本で見せる。</p>
+
+        <h3>おすすめデモストーリー</h3>
+        <ol class="compact">
+          <li>アプリを開く。東京23区の「今の気分」が見える。</li>
+          <li>「これは前回作った、街の気分を見る機能です」と10秒で説明。</li>
+          <li>マイページへ移動し、過去の自分の気分履歴を見せる。</li>
+          <li>「今回は、この記録を未来に使います」と転換。</li>
+          <li>「あなたは雨の日に -0.6、金曜に +0.3」の傾向を表示。</li>
+          <li>東京都・自治体のオープンデータから、明日の都市条件を表示（例：イベント予定 / WBGT）。</li>
+          <li>明日の条件を使い「お元気予報 3.7 / 5」を表示。</li>
+          <li>なぜ3.7なのか、天気・曜日・オープンデータ由来の要因と信頼度を表示。</li>
+          <li>本人の傾向に応じて「散歩した日は +0.4」などを表示。</li>
+          <li>余裕があれば、公園・クーリングシェルター・スポーツ施設等のODから具体的な行動候補を1つ提示。</li>
+        </ol>
+
+        <div class="callout orange">
+          <strong>発表の対比</strong>
+          前回：「今の街を見る」<br>
+          今回：「自分の明日を予報する」
+        </div>
+
+        <h3>説明の一言候補</h3>
+        <pre>「天気予報は空の状態を予報します。
+お元気予報は、自分自身の記録と、
+街が公開しているオープンデータを掛け合わせて、
+“自分の気分の予報”を育てていきます。」</pre>
+      </section>
+
+      <section id="risks" class="section">
+        <h2>15. リスクと逃げ道</h2>
+
+        <table>
+          <thead>
+            <tr><th>リスク</th><th>問題</th><th>逃げ道</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>データ不足</td>
+              <td>個人予報が成立しない</td>
+              <td>デモユーザーに30日分のシード</td>
+            </tr>
+            <tr>
+              <td>AIが落ちる</td>
+              <td>文章生成でデモ停止</td>
+              <td>数値・理由はコードで生成し、定型文fallback</td>
+            </tr>
+            <tr>
+              <td>機能を広げすぎる</td>
+              <td>イベント・事故・ニュース連携で時間消費</td>
+              <td>天気 + 曜日 + trendまででP0成立</td>
+            </tr>
+            <tr>
+              <td>予測が怪しく見える</td>
+              <td>「AIが適当に言っている？」</td>
+              <td>理由・データ数・confidence表示</td>
+            </tr>
+            <tr>
+              <td>UIが間に合わない</td>
+              <td>凝った予報画面で詰まる</td>
+              <td>既存マイページに予報カード1枚追加</td>
+            </tr>
+            <tr>
+              <td>既存コード把握に時間</td>
+              <td>新規参加2人が動けない</td>
+              <td>30分でRepoツアー、I/Fを切って独立作業</td>
+            </tr>
+            <tr>
+              <td>ODの粒度・形式が合わない</td>
+              <td>区・日時でJoinできず、ETLだけで時間を消費</td>
+              <td>開始時にサンプルを確認。Join可能性を見て1種類に即決</td>
+            </tr>
+            <tr>
+              <td>時間軸が用途と合わない</td>
+              <td>実測値しかないデータを「明日予報」に無理に使ってしまう</td>
+              <td>Historical / Current / Future のどれに使うデータか最初に分類</td>
+            </tr>
+            <tr>
+              <td>ODが飾りになる</td>
+              <td>大会テーマとの接続が弱く見える</td>
+              <td>予測理由または分析結果へ必ず直接効かせる</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout red">
+          <strong>やらない勇気</strong>
+          P0が完成していない状態で、事故・ニュース・属性分析・本格ML・SNS機能には手を出さない。
+        </div>
+      </section>
+
+      <section id="repo" class="section">
+        <h2>16. Repo把握メモ</h2>
+        <p class="lead">前回アプリはリポジトリ直下ではなく、主に <code>my-hackathon-app/</code> 配下。</p>
+
+        <pre>FindyCampusHackathon/
+└─ my-hackathon-app/
+   ├─ src/
+   │  ├─ client/
+   │  │  ├─ app.tsx
+   │  │  ├─ MapView.tsx
+   │  │  ├─ PostFlow.tsx
+   │  │  ├─ MyPage.tsx
+   │  │  ├─ charts.tsx
+   │  │  └─ identity.ts
+   │  ├─ shared/
+   │  │  ├─ wards.ts
+   │  │  └─ wardPolygons.ts
+   │  └─ index.tsx
+   ├─ migrations/
+   ├─ scripts/
+   ├─ HANDOFF.md
+   └─ IMPLEMENTATION.md</pre>
+
+        <h3>既存API</h3>
+        <table>
+          <thead><tr><th>API</th><th>用途</th></tr></thead>
+          <tbody>
+            <tr><td>POST /api/moods</td><td>気分投稿</td></tr>
+            <tr><td>GET /api/summary</td><td>直近6時間の区別集計</td></tr>
+            <tr><td>GET /api/moods/recent</td><td>地図ピン用の最近投稿</td></tr>
+            <tr><td>GET /api/moods/mine</td><td>自分の投稿履歴</td></tr>
+            <tr><td>GET /api/moods/mine/summary</td><td>マイページ集計</td></tr>
+            <tr><td>GET /api/insight</td><td>個人向け天気 × 気分AI分析</td></tr>
+          </tbody>
+        </table>
+
+        <h3>最初に読む順番</h3>
+        <ol class="compact">
+          <li><code>my-hackathon-app/HANDOFF.md</code></li>
+          <li><code>my-hackathon-app/IMPLEMENTATION.md</code></li>
+          <li><code>src/index.tsx</code>（API）</li>
+          <li><code>src/client/MyPage.tsx</code>（予報カード追加候補）</li>
+          <li><code>src/client/MapView.tsx</code>（既存の天気分析確認）</li>
+        </ol>
+      </section>
+
+      <section id="done" class="section">
+        <h2>17. 「完成」と言える条件</h2>
+        <p class="lead">全部できる必要はない。以下が通れば今回のv2として成立。</p>
+
+        <div class="checklist">
+          <div class="check"><input id="d1" type="checkbox"><label for="d1"><b>既存ユーザーの過去データから傾向が出る</b><small>最低でも天気・曜日の1〜2要因。</small></label></div>
+          <div class="check"><input id="d2" type="checkbox"><label for="d2"><b>明日の予報値が出る</b><small>1.0〜5.0、理由付き。</small></label></div>
+          <div class="check"><input id="d3" type="checkbox"><label for="d3"><b>なぜその値なのか説明できる</b><small>ブラックボックスにしない。</small></label></div>
+          <div class="check"><input id="d3b" type="checkbox"><label for="d3b"><b>東京都オープンデータが結果に直接効いている</b><small>出典・利用箇所・Historical/Current/Futureの役割まで説明できる。</small></label></div>
+          <div class="check"><input id="d4" type="checkbox"><label for="d4"><b>データ不足なら「分からない」と言える</b><small>無理に予報を装わない。</small></label></div>
+          <div class="check"><input id="d5" type="checkbox"><label for="d5"><b>デモ用ユーザーで必ず見せられる</b><small>本番で空表示にならない。</small></label></div>
+          <div class="check"><input id="d6" type="checkbox"><label for="d6"><b>前回との差を一言で説明できる</b><small>「見る」から「予報する」へ。</small></label></div>
+        </div>
+
+        <div class="callout green" style="margin-top:18px">
+          <strong>最後に戻る言葉</strong>
+          「今回、何を作ったか」ではなく、<b>「ユーザーは、本人データと街のオープンデータを組み合わせることで何が新しく分かるようになったか」</b>で判断する。
+        </div>
+      </section>
+
+      <div class="footer">
+        お元気予報 / 都知事杯オープンデータハッカソン personal notes
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  const boxes = document.querySelectorAll('input[type="checkbox"]');
+  boxes.forEach(box => {
+    const key = 'hackathon-notes-' + box.id;
+    try {
+      box.checked = localStorage.getItem(key) === '1';
+      box.addEventListener('change', () => {
+        localStorage.setItem(key, box.checked ? '1' : '0');
+      });
+    } catch (_) {}
+  });
+})();
+</script>
+</body>
+</html>
